@@ -1,6 +1,6 @@
 {
   "name": "redux-plugin-creator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Handle redux plugin definitions",
   "main": "index.js",
   "type": "module",
@@ -31,5 +31,8 @@
   "bugs": {
     "url": "https://github.com/fernandogmar/redux-plugin-creator/issues"
   },
-  "homepage": "https://github.com/fernandogmar/redux-plugin-creator#readme"
+  "homepage": "https://github.com/fernandogmar/redux-plugin-creator#readme",
+  "peerDependencies": {
+    "redux": "4.x"
+  }
 }
