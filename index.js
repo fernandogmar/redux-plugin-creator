@@ -25,7 +25,7 @@ const registerPlugin = (plugin_name) => {
     if(!plugin_name || !plugin_name) {
          throw new Error(`Input error ${plugin_name}. Please provide plugin name.`);
     }
-    const { nameAction, nameRegisterIndex, PLUGIN_NAME } = namePlugin(plugin_name);
+    const { nameAction, nameReducer, nameSelector, nameRegisterIndex, PLUGIN_NAME } = namePlugin(plugin_name);
 
     if(plugins[PLUGIN_NAME]) {
         throw new Error(`Name conflict: ${PLUGIN_NAME} already exists. Please name plugin with an unique name.`);
@@ -70,7 +70,7 @@ const registerPlugin = (plugin_name) => {
            throw new Error(`Name conflict: ${REDUCER_NAME} already exists. Please name selectors with an unique name.`);
         }
 
-        selectors[REDUCER_NAME] = f;
+        reducers[REDUCER_NAME] = f;
 
         plugins[PLUGIN_NAME].reducers[f.name] = reducers[REDUCER_NAME];
 
@@ -95,13 +95,14 @@ const registerPlugin = (plugin_name) => {
         return { SELECTOR_NAME, [nameSelector(f.name)]: selectors[SELECTOR_NAME]};
     }
 
-    return { PLUGIN_NAME, registerAction, registerSelector };
+    return { PLUGIN_NAME, registerAction, registerReducer, registerSelector };
 };
 
 export {
     registerPlugin,
     actions,
     selectors,
+    reducers,
     plugins
 };
 
