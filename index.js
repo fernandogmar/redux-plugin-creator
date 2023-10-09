@@ -14,6 +14,8 @@ const namePlugin = (plugin_name) => {
     return {
         nameRegisterIndex: name => `${PLUGIN_NAME}_${toSnakeCase(name)}`.toUpperCase(),// MY_PLUGIN_FETCH
         nameAction: name => toCamelCase(`${PLUGIN_NAME.toLowerCase()} ${name} Action`),// myPluginFetchAction
+        nameReducer: name => toCamelCase(`${PLUGIN_NAME.toLowerCase()} ${name} Reducer`),// myPluginStateReducer
+        nameSelector: name => toCamelCase(`${PLUGIN_NAME.toLowerCase()} ${name} Selector`),// myPluginStateSelector
         PLUGIN_NAME
     };
 };
@@ -55,14 +57,51 @@ const registerPlugin = (plugin_name) => {
         plugins[PLUGIN_NAME].actions[f.name] = actions[ACTION_NAME];
 
         return { ACTION_NAME, [nameAction(f.name)]: actions[ACTION_NAME]};
+    };
+
+    const registerReducer = f => {
+
+        if(!f || !f.name) {
+          throw new Error(`Input error ${f}. Please call this method with a named function.`);
+        }
+        const REDUCER_NAME = nameRegisterIndex(f.name);
+
+        if(selectors[REDUCER_NAME]) {
+           throw new Error(`Name conflict: ${REDUCER_NAME} already exists. Please name selectors with an unique name.`);
+        }
+
+        selectors[REDUCER_NAME] = f;
+
+        plugins[PLUGIN_NAME].reducers[f.name] = reducers[REDUCER_NAME];
+
+        return { REDUCER_NAME, [nameReducer(f.name)]: reducers[REDUCER_NAME]};
     }
 
-    return { PLUGIN_NAME, registerAction };
+    const registerSelector = f => {
+
+        if(!f || !f.name) {
+          throw new Error(`Input error ${f}. Please call this method with a named function.`);
+        }
+        const SELECTOR_NAME = nameRegisterIndex(f.name);
+
+        if(selectors[SELECTOR_NAME]) {
+           throw new Error(`Name conflict: ${SELECTOR_NAME} already exists. Please name selectors with an unique name.`);
+        }
+
+        selectors[SELECTOR_NAME] = f;
+
+        plugins[PLUGIN_NAME].selectors[f.name] = selectors[SELECTOR_NAME];
+
+        return { SELECTOR_NAME, [nameSelector(f.name)]: selectors[SELECTOR_NAME]};
+    }
+
+    return { PLUGIN_NAME, registerAction, registerSelector };
 };
 
 export {
     registerPlugin,
     actions,
+    selectors,
     plugins
 };
 
