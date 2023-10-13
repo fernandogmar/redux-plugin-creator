@@ -2,20 +2,21 @@
   "name": "redux-plugin-creator",
   "version": "0.0.5",
   "description": "Handle redux plugin definitions",
-  "main": "index.js",
+  "main": "./src/index.js",
   "type": "module",
   "exports": {
-    ".": "./index.js",
+    ".": "./src/index.js",
     "./*.action.js": "./src/actions/*/*.action.js",
     "./*.reducer.js": "./src/reducers/*/*.reducer.js",
     "./*.selector.js": "./src/selectors/*/*.selector.js",
     "./tests/*.action.js": "./src/actions/*/*.test.js",
     "./tests/*.reducer.js": "./src/reducers/*/*.test.js",
     "./tests/*.selector.js": "./src/selectors/*/*.test.js",
-    "./*.test.js": "./src/tests/*.test.js"
+    "./*.test.js": "./src/tests/*.test.js",
+    "./*.js": "./src/*.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tape src{/**,}/*.test.js"
   },
   "keywords": [
     "redux",
@@ -33,6 +34,10 @@
   },
   "homepage": "https://github.com/fernandogmar/redux-plugin-creator#readme",
   "peerDependencies": {
+    "ramda": "0.29.x",
     "redux": "4.x"
+  },
+  "devDependencies": {
+    "tape": "^5.7.1"
   }
 }
