@@ -1,5 +1,5 @@
 import test from 'tape';
-import REDUX_PLUGIN_CREATOR_META_REFERENCE_ID, { reduxPluginCreatorMetaReferenceIdAction, metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
+import REDUX_PLUGIN_CREATOR_META_REFERENCE_ID, { reduxPluginCreatorMetaReferenceIdAction, reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
 
 const TEST_NAME = 'reduxPluginCreatorMetaReferenceIdActionModule';
 

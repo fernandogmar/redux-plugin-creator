@@ -1,5 +1,5 @@
 import test from 'tape';
-import REDUX_PLUGIN_CREATOR_META_REFERENCE_GROUP, { reduxPluginCreatorMetaReferenceGroupAction, metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
+import REDUX_PLUGIN_CREATOR_META_REFERENCE_GROUP, { reduxPluginCreatorMetaReferenceGroupAction, reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
 
 const TEST_NAME = 'reduxPluginCreatorMetaReferenceGroupActionModule';
 

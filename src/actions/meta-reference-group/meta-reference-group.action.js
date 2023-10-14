@@ -10,6 +10,5 @@ const { ACTION_NAME, reduxPluginCreatorMetaReferenceGroupAction } = registerMeta
 
 export {
     reduxPluginCreatorMetaReferenceGroupAction,
-    reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction,// How bout the registerMetaAction should not add the prefix since it is not used as type?
     ACTION_NAME as default
 };
