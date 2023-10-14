@@ -38,7 +38,7 @@ const registerPlugin = (plugin_name) => {
         selectors: {}
     };
 
-    const registerAction = f => {
+    const registerAction = (f, is_meta) => {
 
         if(!f || !f.name) {
           throw new Error(`Input error ${f}. Please call this method with a named function.`);
@@ -49,15 +49,19 @@ const registerPlugin = (plugin_name) => {
            throw new Error(`Name conflict: ${ACTION_NAME} already exists. Please name actions with an unique name.`);
         }
 
-        actions[ACTION_NAME] = (...args) => ({
-            ...(f.apply(null, args)),
-            type: ACTION_NAME
-        });
+        actions[ACTION_NAME] = is_meta
+            ? f//we don't need the type
+            : (...args) => ({
+                ...(f.apply(null, args)),
+                type: ACTION_NAME
+            });
 
         plugins[PLUGIN_NAME].actions[f.name] = actions[ACTION_NAME];
 
         return { ACTION_NAME, [nameAction(f.name)]: actions[ACTION_NAME]};
     };
+
+    const registerMetaAction = f => registerAction(f, true);
 
     const registerReducer = f => {
 
@@ -95,7 +99,7 @@ const registerPlugin = (plugin_name) => {
         return { SELECTOR_NAME, [nameSelector(f.name)]: selectors[SELECTOR_NAME]};
     }
 
-    return { PLUGIN_NAME, registerAction, registerReducer, registerSelector };
+    return { PLUGIN_NAME, registerAction, registerMetaAction, registerReducer, registerSelector };
 };
 
 export {
