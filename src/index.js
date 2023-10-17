@@ -7,6 +7,56 @@ const plugins = {};
 const reducers = {};
 const reactions = {};
 const selectors = {};
+////////////////////////////////////////////////////////////
+
+const MANY_GROUPS_TO_MANY_PLUGINS= "MANY_GROUPS_TO_MANY_PLUGINS";
+const MANY_GROUPS_TO_ONE_PLUGIN = "MANY_GROUPS_TO_ONE_PLUGIN";
+const ONE_GROUP_TO_MANY_PLUGINS = "ONE_GROUP_TO_MANY_PLUGINS";
+const ONE_GROUP_TO_ONE_PLUGIN = "ONE_GROUP_TO_ONE_PLUGIN";
+const REFERENCE_GROUP_COMMON = '__COMMON__';
+const REFERENCE_ID_DEFAULT = '__DEFAULT__';
+
+const configuration = {
+    default_plugin_relationship: null,
+    plugin_relationships: {}
+};
+const configureDefaultPluginRelationship = (relationship) => {
+    configuration.default_plugin_relationship = relationship || ONE_GROUP_TO_ONE_PLUGIN;
+}
+const configurePlugin = (plugin_name, relationship) => {
+    configuration.plugin_relationships[plugin_name] = relationship;
+}
+
+// to avid cyclick denpendy issue
+const metaReferenceGroup = (reference_group, action) => action?.reference_group
+    ? action
+    : {
+        ...action,
+        reference_group
+    };
+
+const metaReferenceId = (reference_id, action) => action?.reference_id
+    ? action
+    : {
+        ...action,
+        reference_id
+    };
+
+const applyPluginRelationshipLimits = (plugin_name, action) => {
+    const { default_plugin_relationship, plugin_relationships } = configuration;
+    const plugin_relationship = plugin_relationships[plugin_name] || default_plugin_relationship;
+
+    if ([ONE_GROUP_TO_MANY_PLUGINS, ONE_GROUP_TO_ONE_PLUGIN].includes(plugin_relationship))
+        action = metaReferenceGroup(REFERENCE_GROUP_COMMON, action);
+
+    if ([MANY_GROUPS_TO_ONE_PLUGIN, ONE_GROUP_TO_ONE_PLUGIN].includes(plugin_relationship))
+        action = metaReferenceId(REFERENCE_ID_DEFAULT, action);
+
+    return action;
+}
+
+
+/////////////////////////////////////////////////////////
 
 const namePlugin = (plugin_name) => {
     const PLUGIN_NAME = toSnakeCase(plugin_name).toUpperCase();// MY_PLUGIN
@@ -50,8 +100,8 @@ const registerPlugin = (plugin_name) => {
         }
 
         actions[ACTION_NAME] = is_meta
-            ? f//we don't need the type
-            : (...args) => ({
+            ? f//we don't need the type and other meta info
+            : (...args) => applyPluginRelationshipLimits(PLUGIN_NAME, {
                 ...(f.apply(null, args)),
                 type: ACTION_NAME
             });
@@ -103,11 +153,23 @@ const registerPlugin = (plugin_name) => {
 };
 
 export {
+    MANY_GROUPS_TO_MANY_PLUGINS,
+    MANY_GROUPS_TO_ONE_PLUGIN,
+    ONE_GROUP_TO_ONE_PLUGIN,
+    ONE_GROUP_TO_MANY_PLUGINS,
+    REFERENCE_GROUP_COMMON,
+    REFERENCE_ID_DEFAULT,
+
+    configureDefaultPluginRelationship,
+    configurePlugin,
+    metaReferenceGroup,
+    metaReferenceId,
     registerPlugin,
+
     actions,
-    selectors,
+    plugins,
     reducers,
-    plugins
+    selectors
 };
 
 // hepers
@@ -124,3 +186,12 @@ const toCamelCase = str =>
         .trim()
         .replace(/[A-Z]+/g, (letter, index) => index == 0 ? letter.toLowerCase() : '_' + letter.toLowerCase())
         .replace(/(.(\_|-|\s)+.)/g, (subStr) => subStr[0]+(subStr[subStr.length-1].toUpperCase()));
+
+
+const test1 = () => {};
+const { PLUGIN_NAME, registerAction } = registerPlugin('test');
+const { ACTION_NAME, testTest1Action } = registerAction(test1);
+
+////
+configurePlugin(PLUGIN_NAME, ONE_GROUP_TO_MANY_PLUGINS);
+console.log(testTest1Action());
