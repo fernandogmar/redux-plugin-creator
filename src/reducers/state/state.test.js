@@ -46,7 +46,7 @@ test(TEST_NAME, (t) => {
         const expected_state = { slices: { 'any group': { [REDUCER_NAME]: { 'any id': 'test' } } } };
 
         t.notEqual(new_state, state, 'should return a different state');
-        t.deepEqual(new_state, expected_state, 'should update the selected cards');
+        t.deepEqual(new_state, expected_state, 'should update the selected slice');
         t.end();
     });
 
@@ -78,7 +78,7 @@ test(TEST_NAME, (t) => {
         };
 
         t.notEqual(new_state, state, 'should return a different state');
-        t.deepEqual(new_state, expected_state, 'should update the selected cards');
+        t.deepEqual(new_state, expected_state, 'should update the selected slice');
         t.end();
     });
 
@@ -129,7 +129,7 @@ test(TEST_NAME, (t) => {
         };
 
         t.notEqual(new_state, state, 'should return a different state');
-        t.deepEqual(new_state, expected_state, 'should update the selected cards');
+        t.deepEqual(new_state, expected_state, 'should update the selected slice');
         t.end();
     });
 
@@ -172,7 +172,7 @@ test(TEST_NAME, (t) => {
         };
 
         t.notEqual(new_state, state, 'should return a different state');
-        t.deepEqual(new_state, expected_state, 'should update the selected cards');
+        t.deepEqual(new_state, expected_state, 'should update the selected slice');
         t.end();
     });
 
@@ -229,7 +229,120 @@ test(TEST_NAME, (t) => {
         };
 
         t.notEqual(new_state, state, 'should return a different state');
-        t.deepEqual(new_state, expected_state, 'should update the selected cards');
+        t.deepEqual(new_state, expected_state, 'should update the selected slice');
+        t.end();
+    });
+
+    t.test(`${TEST_NAME}: for a no common action to a concrete id and common group/no group, when other references groups were initiated`, (t) => {
+        const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
+        const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
+
+        clearPlugins();
+        const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
+        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = 0, action) {
+            switch(action.type) {
+                case 'ADD_ONE': return test_state + 1;
+                default: return test_state;
+            }
+        });
+        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
+
+        const action = metaReferenceIdAction('THIS_REFERENCE_ID', { type: 'ADD_ONE' });
+        const state = {
+            slices: {
+                [REFERENCE_GROUP_COMMON]: {},
+                [OTHER_REFERENCE_GROUP_1]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'ANY REFERENCE_ID': 0,
+                        'THIS_REFERENCE_ID': 0
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_2]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'ANY REFERENCE_ID': 0,
+                        'THIS_REFERENCE_ID': 0
+                    }
+                }
+            }
+        };
+        const new_state = reduxPluginCreatorStateReducer(state, action);
+        const expected_state = {
+            slices: {
+                [REFERENCE_GROUP_COMMON]: {},
+                [OTHER_REFERENCE_GROUP_1]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'ANY REFERENCE_ID': 0,
+                        'THIS_REFERENCE_ID': 1
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_2]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'ANY REFERENCE_ID': 0,
+                        'THIS_REFERENCE_ID': 1
+                    }
+                }
+            }
+        };
+
+        t.notEqual(new_state, state, 'should return a different state');
+        t.deepEqual(new_state, expected_state, 'should update the selected slice');
+        t.end();
+    });
+
+    t.test(`${TEST_NAME}: for a no common action without concrete id, when other references groups were initiated`, (t) => {
+        const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
+        const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
+
+        clearPlugins();
+        const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
+        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = 0, action) {
+            switch(action.type) {
+                case 'ADD_ONE': return test_state + 1;
+                default: return test_state;
+            }
+        });
+        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
+
+        const action = metaReferenceGroupAction(OTHER_REFERENCE_GROUP_2, { type: 'ADD_ONE' });
+        const state = {
+            slices: {
+                [REFERENCE_GROUP_COMMON]: {},
+                [OTHER_REFERENCE_GROUP_1]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'ANY REFERENCE_ID': 0,
+                        'THIS_REFERENCE_ID': 0
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_2]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'ANY REFERENCE_ID': 0,
+                        'THIS_REFERENCE_ID': 0
+                    }
+                }
+            }
+        };
+        const new_state = reduxPluginCreatorStateReducer(state, action);
+        const expected_state = {
+            slices: {
+                [REFERENCE_GROUP_COMMON]: {},
+                [OTHER_REFERENCE_GROUP_1]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'ANY REFERENCE_ID': 0,
+                        'THIS_REFERENCE_ID': 0
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_2]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        [REFERENCE_ID_DEFAULT]: 1,
+                        'ANY REFERENCE_ID': 0,
+                        'THIS_REFERENCE_ID': 0
+                    }
+                }
+            }
+        };
+
+        t.notEqual(new_state, state, 'should return a different state');
+        t.deepEqual(new_state, expected_state, 'should update the selected slice');
         t.end();
     });
 

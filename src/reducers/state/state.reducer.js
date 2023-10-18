@@ -3,7 +3,7 @@ import { reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction 
 import { reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
 // selectors
 import { reduxPluginCreatorRelationshipSelector } from 'redux-plugin-creator/relationship.selector.js';
-import { reduxPluginCreatorSliceSelector } from 'redux-plugin-creator/slice.selector.js';
+import { reduxPluginCreatorSliceSelector, toPath } from 'redux-plugin-creator/slice.selector.js';
 // utilities
 import { registerReducer } from 'redux-plugin-creator/register.js';// this will create a cyclic layout, infinite loop
 import {
@@ -257,8 +257,6 @@ const getSliceChange = ({ reducer_name, reducer, redux_plugin_creator_state, act
         new_slice_state: reducer(previous_slice_state, action)
     };
 };
-
-const toPath = (reducer_name, { reference_group, reference_id }) => ['slices', reference_group, reducer_name, reference_id];// it should be in sync with reduxPluginCreatorSliceSelector
 
 const { REDUCER_NAME, reduxPluginCreatorStateReducer } = registerReducer(state);
 
