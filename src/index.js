@@ -113,7 +113,8 @@ const registerPlugin = (plugin_name) => {
            throw new Error(`Name conflict: ${ACTION_NAME} already exists. Please name actions with an unique name.`);
         }
 
-        const action = nameFunction(nameAction(f.name), is_meta
+        const f_name = f.name;
+        const action = nameFunction(nameAction(f_name), is_meta
             ? f//we don't need the type and other meta info
             : (...args) => applyPluginRelationshipLimits(PLUGIN_NAME, {
                 ...(f.apply(null, args)),
@@ -123,7 +124,7 @@ const registerPlugin = (plugin_name) => {
 
         actions[ACTION_NAME] = action;
         names[action.name] = ACTION_NAME;
-        plugins[PLUGIN_NAME].actions[f.name] = action;
+        plugins[PLUGIN_NAME].actions[f_name] = action;
 
         return { ACTION_NAME, [action.name]: action};
     };
@@ -141,11 +142,12 @@ const registerPlugin = (plugin_name) => {
            throw new Error(`Name conflict: ${REDUCER_NAME} already exists. Please name selectors with an unique name.`);
         }
 
-        const reducer = nameFunction(nameReducer(f.name), f);
+        const f_name = f.name;
+        const reducer = nameFunction(nameReducer(f_name), f);
 
         reducers[REDUCER_NAME] = reducer;
         names[reducer.name] = REDUCER_NAME;
-        plugins[PLUGIN_NAME].reducers[f.name] = reducer;
+        plugins[PLUGIN_NAME].reducers[f_name] = reducer;
 
         return { REDUCER_NAME, [reducer.name]: reducer};
     }
@@ -161,10 +163,11 @@ const registerPlugin = (plugin_name) => {
            throw new Error(`Name conflict: ${SELECTOR_NAME} already exists. Please name selectors with an unique name.`);
         }
 
-        const selector = nameFunction(nameSelector(f.name), f);
+        const f_name = f.name;
+        const selector = nameFunction(nameSelector(f_name), f);
         selectors[SELECTOR_NAME] = selector;
         names[selector.name] = SELECTOR_NAME;
-        plugins[PLUGIN_NAME].selectors[f.name] = selector;
+        plugins[PLUGIN_NAME].selectors[f_name] = selector;
 
         return { SELECTOR_NAME, [selector.name]: selector};
     }

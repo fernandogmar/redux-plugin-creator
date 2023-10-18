@@ -12,8 +12,11 @@ import {
     configureDefaultPluginRelationship,
     configurePlugin,
     clearPlugins,
-    registerPlugin
+    registerPlugin,
+    plugins
 } from 'redux-plugin-creator';
+
+console.log(plugins);
 
 const TEST_NAME = 'reduxPluginCreatorStateReducerModule';
 
