@@ -2,11 +2,25 @@ import 'redux-plugin-creator/second.test.js';
 import 'redux-plugin-creator/first.action.js';
 
 // registers
-const actions = {};
-const plugins = {};
-const reducers = {};
-const reactions = {};
-const selectors = {};
+let actions = {};
+let names = {};
+let plugins = {};
+let reducers = {};
+let reactions = {};
+let selectors = {};
+
+const clearPlugins = () => {
+    actions = {};
+    names = {};
+    plugins = {};
+    reducers = {};
+    reactions = {};
+    selectors = {};
+    configuration = {
+        default_plugin_relationship: null,
+        plugin_relationships: {}
+    };
+};
 ////////////////////////////////////////////////////////////
 
 const MANY_GROUPS_TO_MANY_PLUGINS= "MANY_GROUPS_TO_MANY_PLUGINS";
@@ -16,7 +30,7 @@ const ONE_GROUP_TO_ONE_PLUGIN = "ONE_GROUP_TO_ONE_PLUGIN";
 const REFERENCE_GROUP_COMMON = '__COMMON__';
 const REFERENCE_ID_DEFAULT = '__DEFAULT__';
 
-const configuration = {
+let configuration = {
     default_plugin_relationship: null,
     plugin_relationships: {}
 };
@@ -57,7 +71,7 @@ const applyPluginRelationshipLimits = (plugin_name, action) => {
 
 
 /////////////////////////////////////////////////////////
-
+const nameFunction = (name, fn) => Object.defineProperty(fn, 'name', { value: name });
 const namePlugin = (plugin_name) => {
     const PLUGIN_NAME = toSnakeCase(plugin_name).toUpperCase();// MY_PLUGIN
 
@@ -99,16 +113,19 @@ const registerPlugin = (plugin_name) => {
            throw new Error(`Name conflict: ${ACTION_NAME} already exists. Please name actions with an unique name.`);
         }
 
-        actions[ACTION_NAME] = is_meta
+        const action = nameFunction(nameAction(f.name), is_meta
             ? f//we don't need the type and other meta info
             : (...args) => applyPluginRelationshipLimits(PLUGIN_NAME, {
                 ...(f.apply(null, args)),
                 type: ACTION_NAME
-            });
+            })
+        );
 
-        plugins[PLUGIN_NAME].actions[f.name] = actions[ACTION_NAME];
+        actions[ACTION_NAME] = action;
+        names[action.name] = ACTION_NAME;
+        plugins[PLUGIN_NAME].actions[f.name] = action;
 
-        return { ACTION_NAME, [nameAction(f.name)]: actions[ACTION_NAME]};
+        return { ACTION_NAME, [action.name]: action};
     };
 
     const registerMetaAction = f => registerAction(f, true);
@@ -124,11 +141,13 @@ const registerPlugin = (plugin_name) => {
            throw new Error(`Name conflict: ${REDUCER_NAME} already exists. Please name selectors with an unique name.`);
         }
 
-        reducers[REDUCER_NAME] = f;
+        const reducer = nameFunction(nameReducer(f.name), f);
 
-        plugins[PLUGIN_NAME].reducers[f.name] = reducers[REDUCER_NAME];
+        reducers[REDUCER_NAME] = reducer;
+        names[reducer.name] = REDUCER_NAME;
+        plugins[PLUGIN_NAME].reducers[f.name] = reducer;
 
-        return { REDUCER_NAME, [nameReducer(f.name)]: reducers[REDUCER_NAME]};
+        return { REDUCER_NAME, [reducer.name]: reducer};
     }
 
     const registerSelector = f => {
@@ -142,11 +161,12 @@ const registerPlugin = (plugin_name) => {
            throw new Error(`Name conflict: ${SELECTOR_NAME} already exists. Please name selectors with an unique name.`);
         }
 
-        selectors[SELECTOR_NAME] = f;
+        const selector = nameFunction(nameSelector(f.name), f);
+        selectors[SELECTOR_NAME] = selector;
+        names[selector.name] = SELECTOR_NAME;
+        plugins[PLUGIN_NAME].selectors[f.name] = selector;
 
-        plugins[PLUGIN_NAME].selectors[f.name] = selectors[SELECTOR_NAME];
-
-        return { SELECTOR_NAME, [nameSelector(f.name)]: selectors[SELECTOR_NAME]};
+        return { SELECTOR_NAME, [selector.name]: selector};
     }
 
     return { PLUGIN_NAME, registerAction, registerMetaAction, registerReducer, registerSelector };
@@ -162,11 +182,14 @@ export {
 
     configureDefaultPluginRelationship,
     configurePlugin,
+    clearPlugins,
     metaReferenceGroup,
     metaReferenceId,
     registerPlugin,
 
     actions,
+    configuration,
+    names,
     plugins,
     reducers,
     selectors
@@ -186,12 +209,3 @@ const toCamelCase = str =>
         .trim()
         .replace(/[A-Z]+/g, (letter, index) => index == 0 ? letter.toLowerCase() : '_' + letter.toLowerCase())
         .replace(/(.(\_|-|\s)+.)/g, (subStr) => subStr[0]+(subStr[subStr.length-1].toUpperCase()));
-
-
-const test1 = () => {};
-const { PLUGIN_NAME, registerAction } = registerPlugin('test');
-const { ACTION_NAME, testTest1Action } = registerAction(test1);
-
-////
-configurePlugin(PLUGIN_NAME, ONE_GROUP_TO_MANY_PLUGINS);
-console.log(testTest1Action());
