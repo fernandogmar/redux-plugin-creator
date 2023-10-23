@@ -179,7 +179,6 @@ test(TEST_NAME, (t) => {
         t.end();
     });
 
-
     t.test(`${TEST_NAME}: for a no common action to a concrete id, when other references groups were initiated`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
