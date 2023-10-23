@@ -71,6 +71,7 @@ const applyPluginRelationshipLimits = (plugin_name, action) => {
 
 
 /////////////////////////////////////////////////////////
+const addPluginName = (plugin_name, fn) => Object.defineProperty(fn, 'plugin_name', { value: plugin_name });
 const nameFunction = (name, fn) => Object.defineProperty(fn, 'name', { value: name });
 const namePlugin = (plugin_name) => {
     const PLUGIN_NAME = toSnakeCase(plugin_name).toUpperCase();// MY_PLUGIN
@@ -114,13 +115,13 @@ const registerPlugin = (plugin_name) => {
         }
 
         const f_name = f.name;
-        const action = nameFunction(nameAction(f_name), is_meta
+        const action = addPluginName(PLUGIN_NAME, nameFunction(nameAction(f_name), is_meta
             ? f//we don't need the type and other meta info
             : (...args) => applyPluginRelationshipLimits(PLUGIN_NAME, {
                 ...(f.apply(null, args)),
                 type: ACTION_NAME
             })
-        );
+        ));
 
         actions[ACTION_NAME] = action;
         names[action.name] = ACTION_NAME;
@@ -143,7 +144,7 @@ const registerPlugin = (plugin_name) => {
         }
 
         const f_name = f.name;
-        const reducer = nameFunction(nameReducer(f_name), f);
+        const reducer = addPluginName(PLUGIN_NAME, nameFunction(nameReducer(f_name), f));
 
         reducers[REDUCER_NAME] = reducer;
         names[reducer.name] = REDUCER_NAME;
@@ -164,7 +165,7 @@ const registerPlugin = (plugin_name) => {
         }
 
         const f_name = f.name;
-        const selector = nameFunction(nameSelector(f_name), f);
+        const selector = addPluginName(PLUGIN_NAME, nameFunction(nameSelector(f_name), f));
         selectors[SELECTOR_NAME] = selector;
         names[selector.name] = SELECTOR_NAME;
         plugins[PLUGIN_NAME].selectors[f_name] = selector;

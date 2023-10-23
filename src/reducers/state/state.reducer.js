@@ -1,12 +1,14 @@
 // actions
+import { reduxPluginCreatorMetaCarbonCopyAction as metaCarbonCopyAction } from 'redux-plugin-creator/meta-carbon-copy.action.js';
 import { reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
 import { reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
 // selectors
-import { reduxPluginCreatorRelationshipSelector } from 'redux-plugin-creator/relationship.selector.js';
+import { reduxPluginCreatorReferenceIdsSelector } from 'redux-plugin-creator/reference-ids.selector.js';
 import { reduxPluginCreatorSliceSelector, toPath } from 'redux-plugin-creator/slice.selector.js';
 // utilities
-import { registerReducer } from 'redux-plugin-creator/register.js';// this will create a cyclic layout, infinite loop
+import { registerReducer } from 'redux-plugin-creator/register.js';// this would create a cyclic layout if plugin relationship not configured properly, infinite loop
 import {
+    actions as action_register,
     configuration,
     names,
     plugins,
@@ -19,7 +21,9 @@ import {
 } from 'redux-plugin-creator';
 import assocPath from 'ramda/src/assocPath';
 import keys from 'ramda/src/keys';
-import toPairs from 'ramda/src/toPairs';
+import path from 'ramda/src/path';
+import prop from 'ramda/src/prop';
+import uniq from 'ramda/src/uniq';
 import values from 'ramda/src/values';
 
 const INITIAL_STATE = Object.freeze({
@@ -59,7 +63,7 @@ const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
         }
     }
 
-    const actions = (action.reference_group !== REFERENCE_GROUP_COMMON)
+    const actions_carbon_original = (action.reference_group !== REFERENCE_GROUP_COMMON)
         ? [ action ]
         : [
             action,
@@ -71,6 +75,22 @@ const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
                     ...metaReferenceGroupAction(reference_group)
                 }))
         ];
+
+    const actions_carbon_copy = actions_carbon_original.filter(prop('carbon_copy_required'))
+            .map( action => uniq(
+                    getPluginReducers([actionPluginName(action)])
+                        .map(reducer => reduxPluginCreatorReferenceIdsSelector(names[reducer.name], action)(redux_plugin_creator_state))
+                        .flat(1)
+                        .filter(reference_id => reference_id !== REFERENCE_ID_DEFAULT)
+                )
+                .map(reference_id => ({
+                    ...metaCarbonCopyAction(action),
+                    ...metaReferenceIdAction(reference_id)
+                }))
+            ).flat(1)
+            .filter(copy => copy.reference_group !== action.reference_group || copy.reference_id !== action.reference_id);
+
+    const actions = actions_carbon_original.concat(actions_carbon_copy);
 
     return actions.reduce(
         slicesState(one_group_reducers, many_groups_reducers),
@@ -93,6 +113,8 @@ const slicesState = (one_group_reducers, many_groups_reducers) => (redux_plugin_
 
 
 // helpers
+const actionPluginName = action => path([action.type, 'plugin_name'], action_register);
+
 const getPluginsByRelationship = (relationship) => keys(plugins)
     .filter((plugin_name) => (getPluginRelationship(plugin_name) === relationship));
 
