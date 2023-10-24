@@ -614,7 +614,7 @@ test(TEST_NAME, (t) => {
     t.test(`${TEST_NAME}: for an action that should be applied to all the references id of the plugin in the same group, when carbon copies recieved should do something different`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
-        const openOne = () => {};
+        const openOne = () => metaCarbonCopyRequiredAction({});
 
         clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerAction: registerMultipleAction, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
@@ -627,11 +627,9 @@ test(TEST_NAME, (t) => {
         });
         configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
-        const action = metaCarbonCopyRequiredAction(
-            metaReferenceGroupAction( OTHER_REFERENCE_GROUP_1,
-                metaReferenceIdAction( 'test_1',
-                    testMultipleOpenOneAction()
-                )
+        const action = metaReferenceGroupAction( OTHER_REFERENCE_GROUP_1,
+            metaReferenceIdAction( 'test_1',
+                testMultipleOpenOneAction()
             )
         );
         const state = {
@@ -694,7 +692,7 @@ test(TEST_NAME, (t) => {
     t.test(`${TEST_NAME}: for an action that should be applied to all the references id of all groups, when carbon copies recieved should do something different`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
-        const openOne = () => {};
+        const openOne = () => metaCarbonCopyRequiredAction({});
 
         clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerAction: registerMultipleAction, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
