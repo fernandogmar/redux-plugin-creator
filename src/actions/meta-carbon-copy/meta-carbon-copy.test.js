@@ -1,12 +1,12 @@
 import test from 'tape';
-import REDUX_PLUGIN_CREATOR_META_REFERENCE_ID, { reduxPluginCreatorMetaCarbonCopyAction, reduxPluginCreatorMetaCarbonCopyAction as metaCarbonCopyAction } from 'redux-plugin-creator/meta-carbon-copy.action.js';
+import REDUX_PLUGIN_CREATOR_META_CARBON_COPY, { reduxPluginCreatorMetaCarbonCopyAction, reduxPluginCreatorMetaCarbonCopyAction as metaCarbonCopyAction } from 'redux-plugin-creator/meta-carbon-copy.action.js';
 
 const TEST_NAME = 'reduxPluginCreatorMetaCarbonCopyActionModule';
 
 test(TEST_NAME, (t) => {
 
     t.test(`${TEST_NAME}: the default value of this module`, (t) => {
-        const actual = REDUX_PLUGIN_CREATOR_META_REFERENCE_ID;
+        const actual = REDUX_PLUGIN_CREATOR_META_CARBON_COPY;
         t.equal(typeof actual, 'string', 'should be a string');
         t.notEqual(actual, '', 'should not be empty');
         t.end();

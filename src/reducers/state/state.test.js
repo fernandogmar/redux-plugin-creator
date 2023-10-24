@@ -2,6 +2,7 @@ import test from 'tape';
 import REDUX_PLUGIN_CREATOR, { reduxPluginCreatorStateReducer, initial_state } from 'redux-plugin-creator/state.reducer.js';
 import { reduxPluginCreatorMetaCarbonCopyAction as metaCarbonCopyAction } from 'redux-plugin-creator/meta-carbon-copy.action.js';
 import { reduxPluginCreatorMetaCarbonCopyRequiredAction as metaCarbonCopyRequiredAction } from 'redux-plugin-creator/meta-carbon-copy-required.action.js';
+import { reduxPluginCreatorMetaCommonCarbonCopyRequiredAction as metaCommonCarbonCopyRequiredAction } from 'redux-plugin-creator/meta-common-carbon-copy-required.action.js';
 import { reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
 import { reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
 import {
@@ -609,6 +610,167 @@ test(TEST_NAME, (t) => {
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
         t.end();
     });
+
+    t.test(`${TEST_NAME}: for an action that should be applied to all the references id of the plugin in the same group, when carbon copies recieved should do something different`, (t) => {
+        const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
+        const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
+        const openOne = () => {};
+
+        clearPlugins();
+        const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerAction: registerMultipleAction, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
+        const { ACTION_NAME: ACTION_MULTIPLE_OPEN_ONE_NAME, testMultipleOpenOneAction } = registerMultipleAction(openOne);
+        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = false, action = {}) {
+            switch(action.type) {
+                case ACTION_MULTIPLE_OPEN_ONE_NAME: return action.carbon_copy ? false : true;
+                default: return test_state
+            }
+        });
+        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
+
+        const action = metaCarbonCopyRequiredAction(
+            metaReferenceGroupAction( OTHER_REFERENCE_GROUP_1,
+                metaReferenceIdAction( 'test_1',
+                    testMultipleOpenOneAction()
+                )
+            )
+        );
+        const state = {
+            slices: {
+                [REFERENCE_GROUP_COMMON]: {
+                    // althought this is not a result of executing actions, but it could be an initialization use case
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': true,
+                        'test_2': true,
+                        'test_3': true
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_1]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': false,
+                        'test_2': true
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_2]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': true,
+                        'test_2': true,
+                        'test_3': true
+                    }
+                }
+            }
+        };
+        const new_state = reduxPluginCreatorStateReducer(state, action);
+        const expected_state = {
+            slices: {
+                [REFERENCE_GROUP_COMMON]: {
+                    // althought this is not a result of executing actions, but it could be an initialization use case
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': true,
+                        'test_2': true,
+                        'test_3': true
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_1]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': true,
+                        'test_2': false
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_2]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': true,
+                        'test_2': true,
+                        'test_3': true
+                    }
+                }
+            }
+        };
+
+        t.notEqual(new_state, state, 'should return a different state');
+        t.deepEqual(new_state, expected_state, 'should update the selected slice');
+        t.end();
+    });
+
+    t.test(`${TEST_NAME}: for an action that should be applied to all the references id of all groups, when carbon copies recieved should do something different`, (t) => {
+        const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
+        const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
+        const openOne = () => {};
+
+        clearPlugins();
+        const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerAction: registerMultipleAction, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
+        const { ACTION_NAME: ACTION_MULTIPLE_OPEN_ONE_NAME, testMultipleOpenOneAction } = registerMultipleAction(openOne);
+        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = false, action = {}) {
+            switch(action.type) {
+                case ACTION_MULTIPLE_OPEN_ONE_NAME: return action.carbon_copy ? false : true;
+                default: return test_state
+            }
+        });
+        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
+
+        const action = metaCommonCarbonCopyRequiredAction(
+            metaReferenceGroupAction( OTHER_REFERENCE_GROUP_1,
+                metaReferenceIdAction( 'test_1',
+                    testMultipleOpenOneAction()
+                )
+            )
+        );
+        const state = {
+            slices: {
+                [REFERENCE_GROUP_COMMON]: {
+                    // althought this is not a result of executing actions, but it could be an initialization use case
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': true,
+                        'test_2': true,
+                        'test_3': true
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_1]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': false,
+                        'test_2': true
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_2]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': true,
+                        'test_2': true,
+                        'test_3': true
+                    }
+                }
+            }
+        };
+        const new_state = reduxPluginCreatorStateReducer(state, action);
+        const expected_state = {
+            slices: {
+                [REFERENCE_GROUP_COMMON]: {
+                    // althought this is not a result of executing actions, but it could be an initialization use case
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': true,
+                        'test_2': true,
+                        'test_3': true
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_1]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': true,
+                        'test_2': false
+                    }
+                },
+                [OTHER_REFERENCE_GROUP_2]: {
+                    [REDUCER_MULTIPLE_NAME]: {
+                        'test_1': false,
+                        'test_2': false,
+                        'test_3': false
+                    }
+                }
+            }
+        };
+
+        t.notEqual(new_state, state, 'should return a different state');
+        t.deepEqual(new_state, expected_state, 'should update the selected slice');
+        t.end();
+    });
+
 
     function _state(values) {
         return {

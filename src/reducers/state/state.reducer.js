@@ -64,15 +64,15 @@ const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
         }
     }
 
-    const actions_carbon_original = (action.reference_group !== REFERENCE_GROUP_COMMON)
+    const actions_carbon_original = (![action.reference_group, action.carbon_copy_required].includes(REFERENCE_GROUP_COMMON))
         ? [ action ]
         : [
             action,
             ...reduxPluginCreatorReferenceGroupsSelector(redux_plugin_creator_state)
-                .filter((reference_group) => (reference_group !== REFERENCE_GROUP_COMMON))
+                .filter((reference_group) => (reference_group !== action.reference_group))
                 .map(reference_group => ({
                     // we need to overwrite the reference group to get the right slice per reducer, since a common action is passed to all groups
-                    ...action,
+                    ...metaCarbonCopyAction(action),
                     ...metaReferenceGroupAction(reference_group)
                 }))
         ];
@@ -98,7 +98,6 @@ const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
     );
 }
 
-
 const slicesState = (one_group_reducers, many_groups_reducers) => (redux_plugin_creator_state, action) =>
     ((action.reference_group === REFERENCE_GROUP_COMMON) ? one_group_reducers : many_groups_reducers)
     .map(
@@ -111,7 +110,6 @@ const slicesState = (one_group_reducers, many_groups_reducers) => (redux_plugin_
         (slices, slice_change) => assocPath(slice_change.slice_path, slice_change.new_slice_state, slices),
         redux_plugin_creator_state
     );
-
 
 // helpers
 const actionPluginName = action => path([action.type, 'plugin_name'], action_register);
