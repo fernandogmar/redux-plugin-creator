@@ -3,6 +3,7 @@ import { reduxPluginCreatorMetaCarbonCopyAction as metaCarbonCopyAction } from '
 import { reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
 import { reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
 // selectors
+import { reduxPluginCreatorReferenceGroupsSelector } from 'redux-plugin-creator/reference-groups.selector.js';
 import { reduxPluginCreatorReferenceIdsSelector } from 'redux-plugin-creator/reference-ids.selector.js';
 import { reduxPluginCreatorSliceSelector, toPath } from 'redux-plugin-creator/slice.selector.js';
 // utilities
@@ -67,7 +68,7 @@ const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
         ? [ action ]
         : [
             action,
-            ...keys(redux_plugin_creator_state.slices)
+            ...reduxPluginCreatorReferenceGroupsSelector(redux_plugin_creator_state)
                 .filter((reference_group) => (reference_group !== REFERENCE_GROUP_COMMON))
                 .map(reference_group => ({
                     // we need to overwrite the reference group to get the right slice per reducer, since a common action is passed to all groups
@@ -81,14 +82,13 @@ const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
                     getPluginReducers([actionPluginName(action)])
                         .map(reducer => reduxPluginCreatorReferenceIdsSelector(names[reducer.name], action)(redux_plugin_creator_state))
                         .flat(1)
-                        .filter(reference_id => reference_id !== REFERENCE_ID_DEFAULT)
+                        .filter(reference_id => ![REFERENCE_ID_DEFAULT, action.reference_id].includes(reference_id) )
                 )
                 .map(reference_id => ({
                     ...metaCarbonCopyAction(action),
                     ...metaReferenceIdAction(reference_id)
                 }))
-            ).flat(1)
-            .filter(copy => copy.reference_group !== action.reference_group || copy.reference_id !== action.reference_id);
+            ).flat(1);
 
     const actions = actions_carbon_original.concat(actions_carbon_copy);
 
@@ -106,8 +106,9 @@ const slicesState = (one_group_reducers, many_groups_reducers) => (redux_plugin_
     )
     .filter(
         ({ new_slice_state, previous_slice_state }) => (new_slice_state !== previous_slice_state)
-    ).reduce(
-        (slices, slice_change) => assocPath(slice_change.slice_path, slice_change.new_slice_state, redux_plugin_creator_state),
+    )
+    .reduce(
+        (slices, slice_change) => assocPath(slice_change.slice_path, slice_change.new_slice_state, slices),
         redux_plugin_creator_state
     );
 

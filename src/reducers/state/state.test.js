@@ -24,20 +24,20 @@ const TEST_NAME = 'reduxPluginCreatorStateReducerModule';
 
 test(TEST_NAME, (t) => {
 
-    t.skip(`${TEST_NAME}: the default export of this module`, (t) => {
+    t.test(`${TEST_NAME}: the default export of this module`, (t) => {
         const actual = REDUX_PLUGIN_CREATOR;
         t.equal(typeof actual, 'string', 'should be a string');
         t.notEqual(actual, '', 'should not be empty');
         t.end();
     });
 
-    t.skip(`${TEST_NAME}: the 'reduxPluginCreatorState' reducer`, (t) => {
+    t.test(`${TEST_NAME}: the 'reduxPluginCreatorState' reducer`, (t) => {
         t.equal(typeof reduxPluginCreatorStateReducer, 'function', 'should be a function');
         t.deepEqual(reduxPluginCreatorStateReducer(), initial_state, 'should return the initial value when called without arguments');
         t.end();
     });
 
-    t.skip(`${TEST_NAME}: for action 'reduxPluginCreatorDeselectAction' the reducer, when the card is selected`, (t) => {
+    t.test(`${TEST_NAME}: for action 'reduxPluginCreatorDeselectAction' the reducer, when the card is selected`, (t) => {
         clearPlugins();
         const { PLUGIN_NAME, registerReducer } = registerPlugin('test');
         const { REDUCER_NAME, testStateReducer } = registerReducer(function state(test_state, action) {
@@ -55,7 +55,7 @@ test(TEST_NAME, (t) => {
         t.end();
     });
 
-    t.skip(`${TEST_NAME}: for a common action, when the references groups were not initiated yet`, (t) => {
+    t.test(`${TEST_NAME}: for a common action, when the references groups were not initiated yet`, (t) => {
         clearPlugins();
         const { PLUGIN_NAME: PLUGIN_SINGLE_NAME, registerReducer: registerSingleReducer } = registerPlugin('test-single');
         const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action) {
@@ -87,7 +87,7 @@ test(TEST_NAME, (t) => {
         t.end();
     });
 
-    t.skip(`${TEST_NAME}: for a common action, when other reference groups were initiated`, (t) => {
+    t.test(`${TEST_NAME}: for a common action, when other reference groups were initiated`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
 
@@ -138,7 +138,7 @@ test(TEST_NAME, (t) => {
         t.end();
     });
 
-    t.skip(`${TEST_NAME}: for a no common action, when other references groups were initiated`, (t) => {
+    t.test(`${TEST_NAME}: for a no common action, when other references groups were initiated`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
 
@@ -181,7 +181,7 @@ test(TEST_NAME, (t) => {
         t.end();
     });
 
-    t.skip(`${TEST_NAME}: for a no common action to a concrete id, when other references groups were initiated`, (t) => {
+    t.test(`${TEST_NAME}: for a no common action to a concrete id, when other references groups were initiated`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
 
@@ -237,7 +237,7 @@ test(TEST_NAME, (t) => {
         t.end();
     });
 
-    t.skip(`${TEST_NAME}: for a no common action to a concrete id and common group/no group, when other references groups were initiated`, (t) => {
+    t.test(`${TEST_NAME}: for a no common action to a concrete id and common group/no group, when other references groups were initiated`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
 
@@ -293,7 +293,7 @@ test(TEST_NAME, (t) => {
         t.end();
     });
 
-    t.skip(`${TEST_NAME}: for a no common action without concrete id, when other references groups were initiated`, (t) => {
+    t.test(`${TEST_NAME}: for a no common action without concrete id, when other references groups were initiated`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
 
@@ -351,7 +351,7 @@ test(TEST_NAME, (t) => {
     });
 
     // carbon copy cases //
-    t.skip(`${TEST_NAME}: for an action that should be applied to all the references id of the plugin in the same group`, (t) => {
+    t.test(`${TEST_NAME}: for an action that should be applied to all the references id of the plugin in the same group`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
         const close = () => {};
@@ -431,7 +431,7 @@ test(TEST_NAME, (t) => {
         t.end();
     });
 
-    t.skip(`${TEST_NAME}: for an action that should be applied to all the references id of all groups`, (t) => {
+    t.test(`${TEST_NAME}: for an action that should be applied to all the references id of all groups`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
         const close = () => {};
