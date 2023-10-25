@@ -41,7 +41,7 @@ test(TEST_NAME, (t) => {
     t.test(`${TEST_NAME}: for action 'reduxPluginCreatorDeselectAction' the reducer, when the card is selected`, (t) => {
         clearPlugins();
         const { PLUGIN_NAME, registerReducer } = registerPlugin('test');
-        const { REDUCER_NAME, testStateReducer } = registerReducer(function state(test_state, action) {
+        const { REDUCER_NAME, testStateReducer } = registerReducer(function state(test_state, action = {}) {
             return action.type;
         });
         configurePlugin(PLUGIN_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
@@ -59,13 +59,13 @@ test(TEST_NAME, (t) => {
     t.test(`${TEST_NAME}: for a common action, when the references groups were not initiated yet`, (t) => {
         clearPlugins();
         const { PLUGIN_NAME: PLUGIN_SINGLE_NAME, registerReducer: registerSingleReducer } = registerPlugin('test-single');
-        const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action) {
+        const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action = {}) {
             return `single ${action.type}`;
         });
         configurePlugin(PLUGIN_SINGLE_NAME, ONE_GROUP_TO_ONE_PLUGIN);
 
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
-        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action) {
+        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action = {}) {
             return `multiple ${action.type}`;
         });
         configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
@@ -94,13 +94,13 @@ test(TEST_NAME, (t) => {
 
         clearPlugins();
         const { PLUGIN_NAME: PLUGIN_SINGLE_NAME, registerReducer: registerSingleReducer } = registerPlugin('test-single');
-        const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action) {
+        const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action = {}) {
             return `single ${action.type}`;
         });
         configurePlugin(PLUGIN_SINGLE_NAME, ONE_GROUP_TO_ONE_PLUGIN);
 
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
-        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action) {
+        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action = {}) {
             return `multiple ${action.type}`;
         });
         configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
@@ -145,13 +145,13 @@ test(TEST_NAME, (t) => {
 
         clearPlugins();
         const { PLUGIN_NAME: PLUGIN_SINGLE_NAME, registerReducer: registerSingleReducer } = registerPlugin('test-single');
-        const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action) {
+        const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action = {}) {
             return `single ${action.type}`;
         });
         configurePlugin(PLUGIN_SINGLE_NAME, ONE_GROUP_TO_ONE_PLUGIN);
 
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
-        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action) {
+        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action = {}) {
             return `multiple ${action.type}`;
         });
         configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
@@ -188,7 +188,7 @@ test(TEST_NAME, (t) => {
 
         clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
-        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action) {
+        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action = {}) {
             switch(action.type) {
                 case 'ADD_ONE': return test_state + 1;
                 default: return test_state;
@@ -244,7 +244,7 @@ test(TEST_NAME, (t) => {
 
         clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
-        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = 0, action) {
+        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = 0, action = {}) {
             switch(action.type) {
                 case 'ADD_ONE': return test_state + 1;
                 default: return test_state;
@@ -300,7 +300,7 @@ test(TEST_NAME, (t) => {
 
         clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
-        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = 0, action) {
+        const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = 0, action = {}) {
             switch(action.type) {
                 case 'ADD_ONE': return test_state + 1;
                 default: return test_state;
@@ -413,8 +413,8 @@ test(TEST_NAME, (t) => {
                 },
                 [OTHER_REFERENCE_GROUP_1]: {
                     [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': false,
-                        'test_2': false
+                        //'test_1': false,
+                        //'test_2': false
                     }
                 },
                 [OTHER_REFERENCE_GROUP_2]: {
@@ -491,15 +491,15 @@ test(TEST_NAME, (t) => {
                 },
                 [OTHER_REFERENCE_GROUP_1]: {
                     [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': false,
-                        'test_2': false
+                        //'test_1': false,
+                        //'test_2': false
                     }
                 },
                 [OTHER_REFERENCE_GROUP_2]: {
                     [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': false,
-                        'test_2': false,
-                        'test_3': false
+                        //'test_1': false,
+                        //'test_2': false,
+                        //'test_3': false
                     }
                 }
             }
@@ -527,7 +527,7 @@ test(TEST_NAME, (t) => {
         const { REDUCER_NAME: REDUCER_MULTIPLE_COUNT_NAME, testMultipleCountReducer } = registerMultipleReducer(function count(test_count = 0, action = {}) {
             switch(action.type) {
                 case ACTION_MULTIPLE_CLOSE_NAME: return test_count + 1;
-                default: return test_state
+                default: return test_count
             }
         });
         configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
@@ -583,9 +583,9 @@ test(TEST_NAME, (t) => {
                 },
                 [OTHER_REFERENCE_GROUP_1]: {
                     [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': false,
-                        'test_2': false,
-                        'test_3': false
+                        //'test_1': false,
+                        //'test_2': false,
+                        //'test_3': false
                     },
                     [REDUCER_MULTIPLE_COUNT_NAME]: {
                         'test_1': 2,
@@ -595,8 +595,8 @@ test(TEST_NAME, (t) => {
                 },
                 [OTHER_REFERENCE_GROUP_2]: {
                     [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': false,
-                        'test_2': false
+                        //'test_1': false,
+                        //'test_2': false
                     },
                     [REDUCER_MULTIPLE_COUNT_NAME]: {
                         'test_1': 1,
@@ -671,7 +671,7 @@ test(TEST_NAME, (t) => {
                 [OTHER_REFERENCE_GROUP_1]: {
                     [REDUCER_MULTIPLE_NAME]: {
                         'test_1': true,
-                        'test_2': false
+                        //'test_2': false
                     }
                 },
                 [OTHER_REFERENCE_GROUP_2]: {
@@ -751,14 +751,14 @@ test(TEST_NAME, (t) => {
                 [OTHER_REFERENCE_GROUP_1]: {
                     [REDUCER_MULTIPLE_NAME]: {
                         'test_1': true,
-                        'test_2': false
+                        //'test_2': false
                     }
                 },
                 [OTHER_REFERENCE_GROUP_2]: {
                     [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': false,
-                        'test_2': false,
-                        'test_3': false
+                        //'test_1': false,
+                        //'test_2': false,
+                        //'test_3': false
                     }
                 }
             }

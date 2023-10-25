@@ -21,6 +21,7 @@ import {
     REFERENCE_ID_DEFAULT
 } from 'redux-plugin-creator';
 import assocPath from 'ramda/src/assocPath';
+import dissocPath from 'ramda/src/dissocPath';
 import keys from 'ramda/src/keys';
 import path from 'ramda/src/path';
 import prop from 'ramda/src/prop';
@@ -107,7 +108,9 @@ const slicesState = (one_group_reducers, many_groups_reducers) => (redux_plugin_
         ({ new_slice_state, previous_slice_state }) => (new_slice_state !== previous_slice_state)
     )
     .reduce(
-        (slices, slice_change) => assocPath(slice_change.slice_path, slice_change.new_slice_state, slices),
+        (slices, slice_change) => (slice_change.new_slice_state === slice_change.initial_state)
+            ? dissocPath(slice_change.slice_path, slices)// we are not saving on store the initial state
+            : assocPath(slice_change.slice_path, slice_change.new_slice_state, slices),
         redux_plugin_creator_state
     );
 
@@ -131,6 +134,7 @@ const getSliceChange = ({ reducer_name, reducer, redux_plugin_creator_state, act
 
     return {
         slice_path: toPath(reducer_name, action),
+        initial_state: reducer(undefined, {}),// it would be ideal to be able to call it without parameters at all reducer()
         previous_slice_state,
         new_slice_state: reducer(previous_slice_state, action)
     };
