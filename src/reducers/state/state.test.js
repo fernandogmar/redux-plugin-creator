@@ -1,5 +1,5 @@
 import test from 'tape';
-import REDUX_PLUGIN_CREATOR, { reduxPluginCreatorStateReducer, initial_state } from 'redux-plugin-creator/state.reducer.js';
+import REDUX_PLUGIN_CREATOR_STATE, { reduxPluginCreatorStateReducer, initial_state } from 'redux-plugin-creator/state.reducer.js';
 import { reduxPluginCreatorMetaCarbonCopyAction as metaCarbonCopyAction } from 'redux-plugin-creator/meta-carbon-copy.action.js';
 import { reduxPluginCreatorMetaCarbonCopyRequiredAction as metaCarbonCopyRequiredAction } from 'redux-plugin-creator/meta-carbon-copy-required.action.js';
 import { reduxPluginCreatorMetaCommonCarbonCopyRequiredAction as metaCommonCarbonCopyRequiredAction } from 'redux-plugin-creator/meta-common-carbon-copy-required.action.js';
@@ -26,7 +26,7 @@ const TEST_NAME = 'reduxPluginCreatorStateReducerModule';
 test(TEST_NAME, (t) => {
 
     t.test(`${TEST_NAME}: the default export of this module`, (t) => {
-        const actual = REDUX_PLUGIN_CREATOR;
+        const actual = REDUX_PLUGIN_CREATOR_STATE;
         t.equal(typeof actual, 'string', 'should be a string');
         t.notEqual(actual, '', 'should not be empty');
         t.end();

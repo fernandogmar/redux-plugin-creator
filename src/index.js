@@ -3,6 +3,7 @@ import 'redux-plugin-creator/first.action.js';
 
 // registers
 let actions = {};
+let loggers = {};
 let names = {};
 let plugins = {};
 let reducers = {};
@@ -11,6 +12,7 @@ let selectors = {};
 
 const clearPlugins = () => {
     actions = {};
+    loggers = {};
     names = {};
     plugins = {};
     reducers = {};
@@ -85,7 +87,7 @@ const namePlugin = (plugin_name) => {
     };
 };
 
-const registerPlugin = (plugin_name) => {
+const _registerPlugin = (plugin_name) => {
 
     if(!plugin_name || !plugin_name) {
          throw new Error(`Input error ${plugin_name}. Please provide plugin name.`);
@@ -98,6 +100,7 @@ const registerPlugin = (plugin_name) => {
 
     plugins[PLUGIN_NAME] = {
         actions: {},
+        loggers: {},
         reducers: {},
         reactions: {},
         selectors: {}
@@ -139,8 +142,8 @@ const registerPlugin = (plugin_name) => {
         }
         const REDUCER_NAME = nameRegisterIndex(f.name);
 
-        if(selectors[REDUCER_NAME]) {
-           throw new Error(`Name conflict: ${REDUCER_NAME} already exists. Please name selectors with an unique name.`);
+        if(reducers[REDUCER_NAME]) {
+           throw new Error(`Name conflict: ${REDUCER_NAME} already exists. Please name reducers with an unique name.`);
         }
 
         const f_name = f.name;
@@ -173,7 +176,49 @@ const registerPlugin = (plugin_name) => {
         return { SELECTOR_NAME, [selector.name]: selector};
     }
 
-    return { PLUGIN_NAME, registerAction, registerMetaAction, registerReducer, registerSelector };
+    const registerReducerAsLogger = f => {
+
+        if(!f || !f.name) {
+          throw new Error(`Input error ${f}. Please call this method with a named function.`);
+        }
+        const REDUCER_NAME = nameRegisterIndex(f.name);
+
+        if(loggers[REDUCER_NAME]) {
+           throw new Error(`Name conflict: ${REDUCER_NAME} already exists as logger. Please name loggers with an unique name.`);
+        }
+
+        const f_name = f.name;
+        const reducer = addPluginName(PLUGIN_NAME, nameFunction(nameReducer(f_name), f));
+
+        loggers[REDUCER_NAME] = reducer;
+        names[reducer.name] = REDUCER_NAME;
+        plugins[PLUGIN_NAME].loggers[f_name] = reducer;
+
+        return { REDUCER_NAME, [reducer.name]: reducer};
+    }
+
+    return { PLUGIN_NAME, registerAction, registerMetaAction, registerReducer, registerSelector, registerReducerAsLogger };
+};
+
+const registerPlugin = (plugin_name) => {
+    const { registerReducerAsLogger: _registerReducerAsLogger, ...other_registers } = _registerPlugin(plugin_name);
+
+    const registerReducerAsLogger = () => {
+        throw new Error(`This plugin has NOT been registered as logger, please use 'registerPlugingLogger' to register your plugin.`)
+    };
+
+    return { registerReducerAsLogger, ...other_registers };
+};
+
+
+const registerPluginAsLogger = (plugin_name) => {
+    const { registerReducer: _registerReducer, ...other_registers } = _registerPlugin(plugin_name);
+
+    const registerReducer = () => {
+        throw new Error(`This plugin has been registered as logger, please use 'registerReducerAsLogger' instead or register your plugin with 'registerPlugin'.`);
+    };
+
+    return { registerReducer, ...other_registers };
 };
 
 export {
@@ -190,9 +235,11 @@ export {
     metaReferenceGroup,
     metaReferenceId,
     registerPlugin,
+    registerPluginAsLogger,
 
     actions,
     configuration,
+    loggers,
     names,
     plugins,
     reducers,
