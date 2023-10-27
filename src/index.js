@@ -25,10 +25,7 @@ const clearPlugins = () => {
 };
 ////////////////////////////////////////////////////////////
 
-const MANY_GROUPS_TO_MANY_PLUGINS= "MANY_GROUPS_TO_MANY_PLUGINS";
-const MANY_GROUPS_TO_ONE_PLUGIN = "MANY_GROUPS_TO_ONE_PLUGIN";
-const ONE_GROUP_TO_MANY_PLUGINS = "ONE_GROUP_TO_MANY_PLUGINS";
-const ONE_GROUP_TO_ONE_PLUGIN = "ONE_GROUP_TO_ONE_PLUGIN";
+
 const REFERENCE_GROUP_COMMON = '__COMMON__';
 const REFERENCE_ID_DEFAULT = '__DEFAULT__';
 
@@ -58,18 +55,24 @@ const metaReferenceId = (reference_id, action) => action?.reference_id
         reference_id
     };
 
-const applyPluginRelationshipLimits = (plugin_name, action) => {
-    const { default_plugin_relationship, plugin_relationships } = configuration;
-    const plugin_relationship = plugin_relationships[plugin_name] || default_plugin_relationship;
+const MANY_GROUPS_TO_MANY_PLUGINS= "MANY_GROUPS_TO_MANY_PLUGINS";
+const MANY_GROUPS_TO_ONE_PLUGIN = "MANY_GROUPS_TO_ONE_PLUGIN";
+const ONE_GROUP_TO_MANY_PLUGINS = "ONE_GROUP_TO_MANY_PLUGINS";
+const ONE_GROUP_TO_ONE_PLUGIN = "ONE_GROUP_TO_ONE_PLUGIN";
 
-    if ([ONE_GROUP_TO_MANY_PLUGINS, ONE_GROUP_TO_ONE_PLUGIN].includes(plugin_relationship))
-        action = metaReferenceGroup(REFERENCE_GROUP_COMMON, action);
+const RELATIONSHIP_LIMITS = {
+    MANY_GROUPS_TO_MANY_PLUGINS: Object.freeze({}),
+    MANY_GROUPS_TO_ONE_PLUGIN: Object.freeze(metaReferenceId(REFERENCE_ID_DEFAULT)),
+    ONE_GROUP_TO_MANY_PLUGINS: Object.freeze(metaReferenceGroup(REFERENCE_GROUP_COMMON)),
+    ONE_GROUP_TO_ONE_PLUGIN: Object.freeze(metaReferenceGroup(REFERENCE_GROUP_COMMON, metaReferenceId(REFERENCE_ID_DEFAULT)))
+};
 
-    if ([MANY_GROUPS_TO_ONE_PLUGIN, ONE_GROUP_TO_ONE_PLUGIN].includes(plugin_relationship))
-        action = metaReferenceId(REFERENCE_ID_DEFAULT, action);
+const applyPluginRelationshipLimits = (plugin_name, action) => ({
+    ...action,
+    ...RELATIONSHIP_LIMITS[getPluginRelationship(plugin_name)]
+});
 
-    return action;
-}
+const getPluginRelationship = (plugin_name) => (configuration.plugin_relationships[plugin_name] || configuration.default_plugin_relationship);
 
 
 /////////////////////////////////////////////////////////
@@ -229,9 +232,11 @@ export {
     REFERENCE_GROUP_COMMON,
     REFERENCE_ID_DEFAULT,
 
+    applyPluginRelationshipLimits,
     configureDefaultPluginRelationship,
     configurePlugin,
     clearPlugins,
+    getPluginRelationship,
     metaReferenceGroup,
     metaReferenceId,
     registerPlugin,

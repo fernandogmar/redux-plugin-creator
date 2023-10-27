@@ -14,12 +14,10 @@ import {
     loggers,
     names,
     plugins,
-    MANY_GROUPS_TO_MANY_PLUGINS,
-    MANY_GROUPS_TO_ONE_PLUGIN,
-    ONE_GROUP_TO_ONE_PLUGIN,
-    ONE_GROUP_TO_MANY_PLUGINS,
     REFERENCE_GROUP_COMMON,
-    REFERENCE_ID_DEFAULT
+    REFERENCE_ID_DEFAULT,
+
+    applyPluginRelationshipLimits
 } from 'redux-plugin-creator';
 import assocPath from 'ramda/src/assocPath';
 import dissocPath from 'ramda/src/dissocPath';
@@ -51,7 +49,7 @@ const logger = (redux_plugin_creator_logger = INITIAL_STATE, action) => {
 const slicesState = (loggers) => (redux_plugin_creator_logger, action) =>
     loggers
     .map(
-        (reducer) => getSliceChange({ reducer_name: names[reducer.name], reducer, redux_plugin_creator_logger, reference: getReferenceForLogger(reducer, action),action })
+        (reducer) => getSliceChange({ reducer_name: names[reducer.name], reducer, redux_plugin_creator_logger, action })
     )
     .filter(
         ({ new_slice_state, previous_slice_state }) => (new_slice_state !== previous_slice_state)
@@ -64,27 +62,8 @@ const slicesState = (loggers) => (redux_plugin_creator_logger, action) =>
     );
 
 // helpers
-const actionPluginName = action => path([action.type, 'plugin_name'], action_register);
-const getReferenceForLogger = (reducer, action) => {
-    switch(getPluginRelationship(reducer.plugin_name)) {
-        case MANY_GROUPS_TO_MANY_PLUGINS: return action;
-        case MANY_GROUPS_TO_ONE_PLUGIN: return {// does it make sense?
-            ...action,
-            ...metaReferenceIdAction(REFERENCE_ID_DEFAULT)
-        };
-        case ONE_GROUP_TO_MANY_PLUGINS: return {
-            ...action,
-            ...metaReferenceGroupAction(REFERENCE_GROUP_COMMON)
-        };
-        case ONE_GROUP_TO_ONE_PLUGIN:
-        default:
-            return metaReferenceGroupAction(REFERENCE_GROUP_COMMON, metaReferenceIdAction(REFERENCE_ID_DEFAULT));
-    }
-}
-
-const getPluginRelationship = (plugin_name) => (configuration.plugin_relationships[plugin_name] || configuration.default_plugin_relationship);
-
-const getSliceChange = ({ reducer_name, reducer, redux_plugin_creator_logger, action, reference }) => {
+const getSliceChange = ({ reducer_name, reducer, redux_plugin_creator_logger, action }) => {
+    const reference = applyPluginRelationshipLimits(reducer.plugin_name, action);
     const previous_slice_state = reduxPluginCreatorSliceSelector(reducer_name, reference)(redux_plugin_creator_logger);
 
     return {

@@ -18,7 +18,9 @@ import {
     ONE_GROUP_TO_ONE_PLUGIN,
     ONE_GROUP_TO_MANY_PLUGINS,
     REFERENCE_GROUP_COMMON,
-    REFERENCE_ID_DEFAULT
+    REFERENCE_ID_DEFAULT,
+
+    getPluginRelationship
 } from 'redux-plugin-creator';
 import assocPath from 'ramda/src/assocPath';
 import dissocPath from 'ramda/src/dissocPath';
@@ -126,8 +128,6 @@ const getPluginReducers = (plugin_names) => plugin_names
     )
     .map(values)
     .flat(1);
-
-const getPluginRelationship = (plugin_name) => (configuration.plugin_relationships[plugin_name] || configuration.default_plugin_relationship);
 
 const getSliceChange = ({ reducer_name, reducer, redux_plugin_creator_state, action }) => {
     const previous_slice_state = reduxPluginCreatorSliceSelector(reducer_name, action)(redux_plugin_creator_state);
