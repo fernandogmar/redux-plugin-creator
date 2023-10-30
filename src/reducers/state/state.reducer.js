@@ -5,12 +5,12 @@ import { reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from
 // selectors
 import { reduxPluginCreatorReferenceGroupsSelector } from 'redux-plugin-creator/reference-groups.selector.js';
 import { reduxPluginCreatorReferenceIdsSelector } from 'redux-plugin-creator/reference-ids.selector.js';
+import { reduxPluginCreatorRelationshipSelector } from 'redux-plugin-creator/relationship.selector.js';
 import { reduxPluginCreatorSliceSelector, toPath } from 'redux-plugin-creator/slice.selector.js';
 // utilities
-import { registerReducer } from 'redux-plugin-creator/register.js';// this would create a cyclic layout if plugin relationship not configured properly, infinite loop
+import PLUGIN_NAME, { registerReducer } from 'redux-plugin-creator/register.js';// this would create a cyclic layout if plugin relationship not configured properly, infinite loop
 import {
     actions as action_register,
-    configuration,
     names,
     plugins,
     MANY_GROUPS_TO_MANY_PLUGINS,
@@ -19,8 +19,7 @@ import {
     ONE_GROUP_TO_MANY_PLUGINS,
     REFERENCE_GROUP_COMMON,
     REFERENCE_ID_DEFAULT,
-
-    getPluginRelationship
+    RELATIONSHIP_LIMITS
 } from 'redux-plugin-creator';
 import assocPath from 'ramda/src/assocPath';
 import dissocPath from 'ramda/src/dissocPath';
@@ -31,17 +30,26 @@ import uniq from 'ramda/src/uniq';
 import values from 'ramda/src/values';
 
 const INITIAL_STATE = Object.freeze({
-    /*configuration: {
-        relationships: {},
-        default_relationship: ONE_GROUP_TO_ONE_PLUGIN
-    },*/
+    configuration: {
+        logger_names: [],
+        plugin_names: {},
+        plugin_relationships: {},
+        default_plugin_relationship: ONE_GROUP_TO_ONE_PLUGIN
+    },
     slices: {}
 });
 
 const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
+    const applyPluginRelationshipLimits = applyPluginRelationshipLimitsForState(redux_plugin_creator_state);
+    const getPluginsByRelationship = getPluginsByRelationshipForState(redux_plugin_creator_state);
 
     // setting the default reference_group and reference_id, if they were not previously setted (remember references can not overwritten)
-    action = metaReferenceGroupAction(REFERENCE_GROUP_COMMON, metaReferenceIdAction(REFERENCE_ID_DEFAULT, action))
+    action = metaReferenceGroupAction(REFERENCE_GROUP_COMMON,
+        metaReferenceIdAction(REFERENCE_ID_DEFAULT,
+            applyPluginRelationshipLimits(action)// what to do with not registered actions? for now will have ONE_GROUP_TO_ONE_PLUGIN as default relationship
+        )
+    );
+
     let one_group_reducers = [];
     let many_groups_reducers = [];
 
@@ -119,8 +127,14 @@ const slicesState = (one_group_reducers, many_groups_reducers) => (redux_plugin_
 // helpers
 const actionPluginName = action => path([action.type, 'plugin_name'], action_register);
 
-const getPluginsByRelationship = (relationship) => keys(plugins)
-    .filter((plugin_name) => (getPluginRelationship(plugin_name) === relationship));
+const applyPluginRelationshipLimitsForState = (redux_plugin_creator_state) => (action = {}) => ({
+    ...action,
+    ...RELATIONSHIP_LIMITS[reduxPluginCreatorRelationshipSelector(action)(redux_plugin_creator_state)]
+});
+
+const getPluginsByRelationshipForState = (redux_plugin_creator_state) => (relationship) => keys(plugins)
+    .filter((plugin_name) => (plugin_name !== PLUGIN_NAME))// this is a workaround to avoid for now that the reduxPluginCreatorStateReducer will be called on infinity nested loop when calling the registered reducers
+    .filter((plugin_name) => (reduxPluginCreatorRelationshipSelector(plugin_name)(redux_plugin_creator_state) === relationship));
 
 const getPluginReducers = (plugin_names) => plugin_names
     .map(

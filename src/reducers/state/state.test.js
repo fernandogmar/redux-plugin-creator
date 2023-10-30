@@ -12,12 +12,18 @@ import {
     ONE_GROUP_TO_MANY_PLUGINS,
     REFERENCE_GROUP_COMMON,
     REFERENCE_ID_DEFAULT,
-    configureDefaultPluginRelationship,
-    configurePlugin,
+
     clearPlugins,
+    getPluginNames,
+    getLoggerNames,
     registerPlugin,
     plugins
 } from 'redux-plugin-creator';
+import reduxPluginCreatorStateConfigurator, {
+    configureDefaultPluginRelationship,
+    configureNameMappers,
+    configurePluginRelationship
+} from 'redux-plugin-creator/state.configurator.js';
 
 console.log(plugins);
 
@@ -38,18 +44,26 @@ test(TEST_NAME, (t) => {
         t.end();
     });
 
-    t.test(`${TEST_NAME}: for action 'reduxPluginCreatorDeselectAction' the reducer, when the card is selected`, (t) => {
+    t.test(`${TEST_NAME}: for an action with referenced group and id`, (t) => {
+        const first = () => {};
+
         clearPlugins();
-        const { PLUGIN_NAME, registerReducer } = registerPlugin('test');
+        const { PLUGIN_NAME, registerAction, registerReducer } = registerPlugin('test');
+        const { ACTION_NAME: ACTION_FIRST_NAME, testFirstAction } = registerAction(first);
         const { REDUCER_NAME, testStateReducer } = registerReducer(function state(test_state, action = {}) {
             return action.type;
         });
-        configurePlugin(PLUGIN_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
-        const action = metaReferenceGroupAction('any group', metaReferenceIdAction('any id', { type: 'test' }));
-        const state = { slices: {} };
+        const action = metaReferenceGroupAction('any group', metaReferenceIdAction('any id', testFirstAction()));
+        const state = reduxPluginCreatorStateConfigurator(initial_state)
+            .map(configurePluginRelationship(PLUGIN_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
+            .get();
         const new_state = reduxPluginCreatorStateReducer(state, action);
-        const expected_state = { slices: { 'any group': { [REDUCER_NAME]: { 'any id': 'test' } } } };
+        const expected_state = {
+            ...state,
+            slices: { 'any group': { [REDUCER_NAME]: { 'any id': ACTION_FIRST_NAME } } }
+        };
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
@@ -62,18 +76,20 @@ test(TEST_NAME, (t) => {
         const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action = {}) {
             return `single ${action.type}`;
         });
-        configurePlugin(PLUGIN_SINGLE_NAME, ONE_GROUP_TO_ONE_PLUGIN);
 
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
         const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action = {}) {
             return `multiple ${action.type}`;
         });
-        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
         const action = { type: 'test' };
-        const state = { slices: {} };
+        const state = reduxPluginCreatorStateConfigurator(initial_state)
+            .map(configurePluginRelationship(PLUGIN_SINGLE_NAME, ONE_GROUP_TO_ONE_PLUGIN))
+            .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .get();
         const new_state = reduxPluginCreatorStateReducer(state, action);
         const expected_state = {
+            ...state,
             slices: {
                 [REFERENCE_GROUP_COMMON]: {
                     [REDUCER_SINGLE_NAME]: {
@@ -97,24 +113,27 @@ test(TEST_NAME, (t) => {
         const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action = {}) {
             return `single ${action.type}`;
         });
-        configurePlugin(PLUGIN_SINGLE_NAME, ONE_GROUP_TO_ONE_PLUGIN);
 
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
         const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action = {}) {
             return `multiple ${action.type}`;
         });
-        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
         const action = { type: 'test' };
-        const state = {
-            slices: {
-                [REFERENCE_GROUP_COMMON]: {},
-                [OTHER_REFERENCE_GROUP_1]: {},
-                [OTHER_REFERENCE_GROUP_2]: {}
-            }
-        };
+        const state = reduxPluginCreatorStateConfigurator({
+                slices: {
+                    [REFERENCE_GROUP_COMMON]: {},
+                    [OTHER_REFERENCE_GROUP_1]: {},
+                    [OTHER_REFERENCE_GROUP_2]: {}
+                }
+            })
+            .map(configurePluginRelationship(PLUGIN_SINGLE_NAME, ONE_GROUP_TO_ONE_PLUGIN))
+            .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .get();
+
         const new_state = reduxPluginCreatorStateReducer(state, action);
         const expected_state = {
+            ...state,
             slices: {
                 [REFERENCE_GROUP_COMMON]: {
                     [REDUCER_SINGLE_NAME]: {
@@ -148,24 +167,27 @@ test(TEST_NAME, (t) => {
         const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action = {}) {
             return `single ${action.type}`;
         });
-        configurePlugin(PLUGIN_SINGLE_NAME, ONE_GROUP_TO_ONE_PLUGIN);
 
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
         const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action = {}) {
             return `multiple ${action.type}`;
         });
-        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
         const action = metaReferenceGroupAction(OTHER_REFERENCE_GROUP_2, { type: 'test 2' });
-        const state = {
-            slices: {
-                [REFERENCE_GROUP_COMMON]: {},
-                [OTHER_REFERENCE_GROUP_1]: {},
-                [OTHER_REFERENCE_GROUP_2]: {}
-            }
-        };
+        const state = reduxPluginCreatorStateConfigurator({
+                slices: {
+                    [REFERENCE_GROUP_COMMON]: {},
+                    [OTHER_REFERENCE_GROUP_1]: {},
+                    [OTHER_REFERENCE_GROUP_2]: {}
+                }
+            })
+            .map(configurePluginRelationship(PLUGIN_SINGLE_NAME, ONE_GROUP_TO_ONE_PLUGIN))
+            .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .get();
+
         const new_state = reduxPluginCreatorStateReducer(state, action);
         const expected_state = {
+            ...state,
             slices: {
                 [REFERENCE_GROUP_COMMON]: {},
                 [OTHER_REFERENCE_GROUP_1]: {},
@@ -194,28 +216,31 @@ test(TEST_NAME, (t) => {
                 default: return test_state;
             }
         });
-        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
         const action = metaReferenceGroupAction(OTHER_REFERENCE_GROUP_2, metaReferenceIdAction('THIS_REFERENCE_ID', { type: 'ADD_ONE' }));
-        const state = {
-            slices: {
-                [REFERENCE_GROUP_COMMON]: {},
-                [OTHER_REFERENCE_GROUP_1]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'ANY REFERENCE_ID': 0,
-                        'THIS_REFERENCE_ID': 0
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_2]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'ANY REFERENCE_ID': 0,
-                        'THIS_REFERENCE_ID': 0
+        const state = reduxPluginCreatorStateConfigurator({
+                slices: {
+                    [REFERENCE_GROUP_COMMON]: {},
+                    [OTHER_REFERENCE_GROUP_1]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'ANY REFERENCE_ID': 0,
+                            'THIS_REFERENCE_ID': 0
+                        }
+                    },
+                    [OTHER_REFERENCE_GROUP_2]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'ANY REFERENCE_ID': 0,
+                            'THIS_REFERENCE_ID': 0
+                        }
                     }
                 }
-            }
-        };
+            })
+            .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .get();
+
         const new_state = reduxPluginCreatorStateReducer(state, action);
         const expected_state = {
+            ...state,
             slices: {
                 [REFERENCE_GROUP_COMMON]: {},
                 [OTHER_REFERENCE_GROUP_1]: {
@@ -250,28 +275,31 @@ test(TEST_NAME, (t) => {
                 default: return test_state;
             }
         });
-        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
         const action = metaReferenceIdAction('THIS_REFERENCE_ID', { type: 'ADD_ONE' });
-        const state = {
-            slices: {
-                [REFERENCE_GROUP_COMMON]: {},
-                [OTHER_REFERENCE_GROUP_1]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'ANY REFERENCE_ID': 0,
-                        'THIS_REFERENCE_ID': 0
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_2]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'ANY REFERENCE_ID': 0,
-                        'THIS_REFERENCE_ID': 0
+        const state = reduxPluginCreatorStateConfigurator({
+                slices: {
+                    [REFERENCE_GROUP_COMMON]: {},
+                    [OTHER_REFERENCE_GROUP_1]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'ANY REFERENCE_ID': 0,
+                            'THIS_REFERENCE_ID': 0
+                        }
+                    },
+                    [OTHER_REFERENCE_GROUP_2]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'ANY REFERENCE_ID': 0,
+                            'THIS_REFERENCE_ID': 0
+                        }
                     }
                 }
-            }
-        };
+            })
+            .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .get();
+
         const new_state = reduxPluginCreatorStateReducer(state, action);
         const expected_state = {
+            ...state,
             slices: {
                 [REFERENCE_GROUP_COMMON]: {},
                 [OTHER_REFERENCE_GROUP_1]: {
@@ -306,28 +334,31 @@ test(TEST_NAME, (t) => {
                 default: return test_state;
             }
         });
-        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
         const action = metaReferenceGroupAction(OTHER_REFERENCE_GROUP_2, { type: 'ADD_ONE' });
-        const state = {
-            slices: {
-                [REFERENCE_GROUP_COMMON]: {},
-                [OTHER_REFERENCE_GROUP_1]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'ANY REFERENCE_ID': 0,
-                        'THIS_REFERENCE_ID': 0
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_2]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'ANY REFERENCE_ID': 0,
-                        'THIS_REFERENCE_ID': 0
+        const state = reduxPluginCreatorStateConfigurator({
+                slices: {
+                    [REFERENCE_GROUP_COMMON]: {},
+                    [OTHER_REFERENCE_GROUP_1]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'ANY REFERENCE_ID': 0,
+                            'THIS_REFERENCE_ID': 0
+                        }
+                    },
+                    [OTHER_REFERENCE_GROUP_2]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'ANY REFERENCE_ID': 0,
+                            'THIS_REFERENCE_ID': 0
+                        }
                     }
                 }
-            }
-        };
+            })
+            .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .get();
+
         const new_state = reduxPluginCreatorStateReducer(state, action);
         const expected_state = {
+            ...state,
             slices: {
                 [REFERENCE_GROUP_COMMON]: {},
                 [OTHER_REFERENCE_GROUP_1]: {
@@ -366,7 +397,6 @@ test(TEST_NAME, (t) => {
                 default: return test_state
             }
         });
-        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
         const action = metaCarbonCopyRequiredAction(
             metaReferenceGroupAction( OTHER_REFERENCE_GROUP_1,
@@ -375,33 +405,37 @@ test(TEST_NAME, (t) => {
                 )
             )
         );
-        const state = {
-            slices: {
-                [REFERENCE_GROUP_COMMON]: {
-                    // althought this is not a result of executing actions, but it could be an initialization use case
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true,
-                        'test_3': true
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_1]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_2]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true,
-                        'test_3': true
+        const state = reduxPluginCreatorStateConfigurator({
+                slices: {
+                    [REFERENCE_GROUP_COMMON]: {
+                        // althought this is not a result of executing actions, but it could be an initialization use case
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true,
+                            'test_3': true
+                        }
+                    },
+                    [OTHER_REFERENCE_GROUP_1]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true
+                        }
+                    },
+                    [OTHER_REFERENCE_GROUP_2]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true,
+                            'test_3': true
+                        }
                     }
                 }
-            }
-        };
+            })
+            .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .get();
+
         const new_state = reduxPluginCreatorStateReducer(state, action);
         const expected_state = {
+            ...state,
             slices: {
                 [REFERENCE_GROUP_COMMON]: {
                     // althought this is not a result of executing actions, but it could be an initialization use case
@@ -446,40 +480,43 @@ test(TEST_NAME, (t) => {
                 default: return test_state
             }
         });
-        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
         const action = metaCarbonCopyRequiredAction(
             metaReferenceIdAction( 'test_1',
                 testMultipleCloseAction()
             )
         );
-        const state = {
-            slices: {
-                [REFERENCE_GROUP_COMMON]: {
-                    // althought this is not a result of executing actions, but it could be an initialization use case
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true,
-                        'test_3': true
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_1]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_2]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true,
-                        'test_3': true
+        const state = reduxPluginCreatorStateConfigurator({
+                slices: {
+                    [REFERENCE_GROUP_COMMON]: {
+                        // althought this is not a result of executing actions, but it could be an initialization use case
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true,
+                            'test_3': true
+                        }
+                    },
+                    [OTHER_REFERENCE_GROUP_1]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true
+                        }
+                    },
+                    [OTHER_REFERENCE_GROUP_2]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true,
+                            'test_3': true
+                        }
                     }
                 }
-            }
-        };
+            })
+            .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .get();
+
         const new_state = reduxPluginCreatorStateReducer(state, action);
         const expected_state = {
+            ...state,
             slices: {
                 [REFERENCE_GROUP_COMMON]: {
                     // althought this is not a result of executing actions, but it could be an initialization use case
@@ -530,48 +567,51 @@ test(TEST_NAME, (t) => {
                 default: return test_count
             }
         });
-        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
         const action = metaCarbonCopyRequiredAction(
             metaReferenceIdAction( 'test_1',
                 testMultipleCloseAction()
             )
         );
-        const state = {
-            slices: {
-                [REFERENCE_GROUP_COMMON]: {
-                    // althought this is not a result of executing actions, but it could be an initialization use case
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true,
-                        'test_3': true
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_1]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true
+        const state = reduxPluginCreatorStateConfigurator({
+                slices: {
+                    [REFERENCE_GROUP_COMMON]: {
+                        // althought this is not a result of executing actions, but it could be an initialization use case
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true,
+                            'test_3': true
+                        }
                     },
-                    [REDUCER_MULTIPLE_COUNT_NAME]: {
-                        'test_1': 1,
-                        'test_2': 2,
-                        'test_3': 0
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_2]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true
+                    [OTHER_REFERENCE_GROUP_1]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true
+                        },
+                        [REDUCER_MULTIPLE_COUNT_NAME]: {
+                            'test_1': 1,
+                            'test_2': 2,
+                            'test_3': 0
+                        }
                     },
-                    [REDUCER_MULTIPLE_COUNT_NAME]: {
-                        'test_1': 0,
-                        'test_2': 0
+                    [OTHER_REFERENCE_GROUP_2]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true
+                        },
+                        [REDUCER_MULTIPLE_COUNT_NAME]: {
+                            'test_1': 0,
+                            'test_2': 0
+                        }
                     }
                 }
-            }
-        };
+            })
+            .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .get();
+
         const new_state = reduxPluginCreatorStateReducer(state, action);
         const expected_state = {
+            ...state,
             slices: {
                 [REFERENCE_GROUP_COMMON]: {
                     // althought this is not a result of executing actions, but it could be an initialization use case
@@ -625,40 +665,43 @@ test(TEST_NAME, (t) => {
                 default: return test_state
             }
         });
-        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
         const action = metaReferenceGroupAction( OTHER_REFERENCE_GROUP_1,
             metaReferenceIdAction( 'test_1',
                 testMultipleOpenOneAction()
             )
         );
-        const state = {
-            slices: {
-                [REFERENCE_GROUP_COMMON]: {
-                    // althought this is not a result of executing actions, but it could be an initialization use case
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true,
-                        'test_3': true
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_1]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': false,
-                        'test_2': true
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_2]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true,
-                        'test_3': true
+        const state = reduxPluginCreatorStateConfigurator({
+                slices: {
+                    [REFERENCE_GROUP_COMMON]: {
+                        // althought this is not a result of executing actions, but it could be an initialization use case
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true,
+                            'test_3': true
+                        }
+                    },
+                    [OTHER_REFERENCE_GROUP_1]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': false,
+                            'test_2': true
+                        }
+                    },
+                    [OTHER_REFERENCE_GROUP_2]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true,
+                            'test_3': true
+                        }
                     }
                 }
-            }
-        };
+            })
+            .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .get();
+
         const new_state = reduxPluginCreatorStateReducer(state, action);
         const expected_state = {
+            ...state,
             slices: {
                 [REFERENCE_GROUP_COMMON]: {
                     // althought this is not a result of executing actions, but it could be an initialization use case
@@ -703,7 +746,6 @@ test(TEST_NAME, (t) => {
                 default: return test_state
             }
         });
-        configurePlugin(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS);
 
         const action = metaCommonCarbonCopyRequiredAction(
             metaReferenceGroupAction( OTHER_REFERENCE_GROUP_1,
@@ -712,33 +754,37 @@ test(TEST_NAME, (t) => {
                 )
             )
         );
-        const state = {
-            slices: {
-                [REFERENCE_GROUP_COMMON]: {
-                    // althought this is not a result of executing actions, but it could be an initialization use case
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true,
-                        'test_3': true
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_1]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': false,
-                        'test_2': true
-                    }
-                },
-                [OTHER_REFERENCE_GROUP_2]: {
-                    [REDUCER_MULTIPLE_NAME]: {
-                        'test_1': true,
-                        'test_2': true,
-                        'test_3': true
+        const state = reduxPluginCreatorStateConfigurator({
+                slices: {
+                    [REFERENCE_GROUP_COMMON]: {
+                        // althought this is not a result of executing actions, but it could be an initialization use case
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true,
+                            'test_3': true
+                        }
+                    },
+                    [OTHER_REFERENCE_GROUP_1]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': false,
+                            'test_2': true
+                        }
+                    },
+                    [OTHER_REFERENCE_GROUP_2]: {
+                        [REDUCER_MULTIPLE_NAME]: {
+                            'test_1': true,
+                            'test_2': true,
+                            'test_3': true
+                        }
                     }
                 }
-            }
-        };
+            })
+            .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .get();
+
         const new_state = reduxPluginCreatorStateReducer(state, action);
         const expected_state = {
+            ...state,
             slices: {
                 [REFERENCE_GROUP_COMMON]: {
                     // althought this is not a result of executing actions, but it could be an initialization use case
@@ -768,7 +814,6 @@ test(TEST_NAME, (t) => {
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
         t.end();
     });
-
 
     function _state(values) {
         return {

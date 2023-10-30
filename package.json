@@ -7,6 +7,7 @@
   "exports": {
     ".": "./src/index.js",
     "./*.action.js": "./src/actions/*/*.action.js",
+    "./*.configurator.js": "./src/reducers/*/*.configurator.js",
     "./*.reducer.js": "./src/reducers/*/*.reducer.js",
     "./*.selector.js": "./src/selectors/*/*.selector.js",
     "./tests/*.action.js": "./src/actions/*/*.test.js",

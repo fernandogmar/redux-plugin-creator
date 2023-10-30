@@ -1,5 +1,8 @@
 import 'redux-plugin-creator/second.test.js';
 import 'redux-plugin-creator/first.action.js';
+import fromPairs from 'ramda/src/fromPairs';
+import keys from 'ramda/src/keys';
+import toPairs from 'ramda/src/toPairs';
 
 // registers
 let actions = {};
@@ -10,6 +13,15 @@ let reducers = {};
 let reactions = {};
 let selectors = {};
 
+const getPluginNames = () => fromPairs(
+    [actions, reducers, selectors, reactions]
+        .map(toPairs)
+        .flat(1)
+        .map(([name, method])=> [name, method.plugin_name])
+);
+
+const getLoggerNames = () => keys(loggers);
+
 const clearPlugins = () => {
     actions = {};
     loggers = {};
@@ -18,27 +30,12 @@ const clearPlugins = () => {
     reducers = {};
     reactions = {};
     selectors = {};
-    configuration = {
-        default_plugin_relationship: null,
-        plugin_relationships: {}
-    };
 };
 ////////////////////////////////////////////////////////////
-
 
 const REFERENCE_GROUP_COMMON = '__COMMON__';
 const REFERENCE_ID_DEFAULT = '__DEFAULT__';
 
-let configuration = {
-    default_plugin_relationship: null,
-    plugin_relationships: {}
-};
-const configureDefaultPluginRelationship = (relationship) => {
-    configuration.default_plugin_relationship = relationship || ONE_GROUP_TO_ONE_PLUGIN;
-}
-const configurePlugin = (plugin_name, relationship) => {
-    configuration.plugin_relationships[plugin_name] = relationship;
-}
 
 // to avid cyclick denpendy issue
 const metaReferenceGroup = (reference_group, action) => action?.reference_group
@@ -55,6 +52,7 @@ const metaReferenceId = (reference_id, action) => action?.reference_id
         reference_id
     };
 
+// should it be moved to relationship.selector.js??
 const MANY_GROUPS_TO_MANY_PLUGINS= "MANY_GROUPS_TO_MANY_PLUGINS";
 const MANY_GROUPS_TO_ONE_PLUGIN = "MANY_GROUPS_TO_ONE_PLUGIN";
 const ONE_GROUP_TO_MANY_PLUGINS = "ONE_GROUP_TO_MANY_PLUGINS";
@@ -67,15 +65,8 @@ const RELATIONSHIP_LIMITS = {
     ONE_GROUP_TO_ONE_PLUGIN: Object.freeze(metaReferenceGroup(REFERENCE_GROUP_COMMON, metaReferenceId(REFERENCE_ID_DEFAULT)))
 };
 
-const applyPluginRelationshipLimits = (plugin_name, action) => ({
-    ...action,
-    ...RELATIONSHIP_LIMITS[getPluginRelationship(plugin_name)]
-});
-
-const getPluginRelationship = (plugin_name) => (configuration.plugin_relationships[plugin_name] || configuration.default_plugin_relationship);
-
-
 /////////////////////////////////////////////////////////
+
 const addPluginName = (plugin_name, fn) => Object.defineProperty(fn, 'plugin_name', { value: plugin_name });
 const nameFunction = (name, fn) => Object.defineProperty(fn, 'name', { value: name });
 const namePlugin = (plugin_name) => {
@@ -123,7 +114,7 @@ const _registerPlugin = (plugin_name) => {
         const f_name = f.name;
         const action = addPluginName(PLUGIN_NAME, nameFunction(nameAction(f_name), is_meta
             ? f//we don't need the type and other meta info
-            : (...args) => applyPluginRelationshipLimits(PLUGIN_NAME, {
+            : (...args) => ({
                 ...(f.apply(null, args)),
                 type: ACTION_NAME
             })
@@ -231,19 +222,17 @@ export {
     ONE_GROUP_TO_MANY_PLUGINS,
     REFERENCE_GROUP_COMMON,
     REFERENCE_ID_DEFAULT,
+    RELATIONSHIP_LIMITS,
 
-    applyPluginRelationshipLimits,
-    configureDefaultPluginRelationship,
-    configurePlugin,
     clearPlugins,
-    getPluginRelationship,
+    getPluginNames,
+    getLoggerNames,
     metaReferenceGroup,
     metaReferenceId,
     registerPlugin,
     registerPluginAsLogger,
 
     actions,
-    configuration,
     loggers,
     names,
     plugins,
