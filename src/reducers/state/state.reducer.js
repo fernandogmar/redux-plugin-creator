@@ -3,6 +3,7 @@ import { reduxPluginCreatorMetaCarbonCopyAction as metaCarbonCopyAction } from '
 import { reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
 import { reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
 // selectors
+import { reduxPluginCreatorPluginNameSelector } from 'redux-plugin-creator/plugin-name.selector.js';
 import { reduxPluginCreatorReferenceGroupsSelector } from 'redux-plugin-creator/reference-groups.selector.js';
 import { reduxPluginCreatorReferenceIdsSelector } from 'redux-plugin-creator/reference-ids.selector.js';
 import { reduxPluginCreatorRelationshipSelector } from 'redux-plugin-creator/relationship.selector.js';
@@ -24,6 +25,7 @@ import {
 } from 'redux-plugin-creator';
 import assocPath from 'ramda/src/assocPath';
 import dissocPath from 'ramda/src/dissocPath';
+import fromPairs from 'ramda/src/fromPairs';
 import keys from 'ramda/src/keys';
 import path from 'ramda/src/path';
 import prop from 'ramda/src/prop';
@@ -42,7 +44,6 @@ const INITIAL_STATE = Object.freeze({
 
 const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
     const applyPluginRelationshipLimits = applyPluginRelationshipLimitsForState(redux_plugin_creator_state);
-    const getReducersByRelationship = getReducersByRelationshipForState(reducers, redux_plugin_creator_state);
 
     // setting the default reference_group and reference_id, if they were not previously setted (remember references can not overwritten)
     action = metaReferenceGroupAction(REFERENCE_GROUP_COMMON,
@@ -50,27 +51,6 @@ const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
             applyPluginRelationshipLimits(action, action)// what to do with not registered actions? for now will have ONE_GROUP_TO_ONE_PLUGIN as default relationship
         )
     );
-
-    let one_group_reducers = [];
-    let many_groups_reducers = [];
-
-    if(action.reference_id === REFERENCE_ID_DEFAULT) {
-        many_groups_reducers = [
-            ...getReducersByRelationship(MANY_GROUPS_TO_ONE_PLUGIN),
-            ...getReducersByRelationship(MANY_GROUPS_TO_MANY_PLUGINS)
-        ];
-        if(action.reference_group === REFERENCE_GROUP_COMMON) {
-            one_group_reducers = [
-                ...getReducersByRelationship(ONE_GROUP_TO_ONE_PLUGIN),
-                ...getReducersByRelationship(ONE_GROUP_TO_MANY_PLUGINS)
-            ];
-        }
-    } else {
-        many_groups_reducers = getReducersByRelationship(MANY_GROUPS_TO_MANY_PLUGINS);
-        if(action.reference_group === REFERENCE_GROUP_COMMON) {
-            one_group_reducers = getReducersByRelationship(ONE_GROUP_TO_MANY_PLUGINS);
-        }
-    }
 
     const actions_carbon_original = (![action.reference_group, action.carbon_copy_required].includes(REFERENCE_GROUP_COMMON))
         ? [ action ]
@@ -87,7 +67,7 @@ const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
 
     const actions_carbon_copy = actions_carbon_original.filter(prop('carbon_copy_required'))
             .map( action => uniq(
-                    getPluginReducers([actionPluginName(action)])
+                    getPluginReducers([reduxPluginCreatorPluginNameSelector(action)((redux_plugin_creator_state))])
                         .map(reducer => reduxPluginCreatorReferenceIdsSelector(names[reducer.name], action)(redux_plugin_creator_state))
                         .flat(1)
                         .filter(reference_id => ![REFERENCE_ID_DEFAULT, action.reference_id].includes(reference_id) )
@@ -99,10 +79,9 @@ const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
             ).flat(1);
 
     const actions = actions_carbon_original.concat(actions_carbon_copy);
-    const reducersSelector = action => ((action.reference_group === REFERENCE_GROUP_COMMON) ? one_group_reducers : many_groups_reducers);
 
     return actions.reduce(
-        slicesState(reducersSelector),
+        slicesState(reducersSelector(reducers, redux_plugin_creator_state)),
         redux_plugin_creator_state
     );
 }
@@ -123,8 +102,6 @@ const slicesState = (reducersSelector) => (redux_plugin_creator_state, action) =
     );
 
 // helpers
-const actionPluginName = action => path([action.type, 'plugin_name'], action_register);
-
 const applyPluginRelationshipLimitsForState = (redux_plugin_creator_state) => (reference, action = {}) => ({
     ...action,
     ...RELATIONSHIP_LIMITS[reduxPluginCreatorRelationshipSelector(reference)(redux_plugin_creator_state)]
@@ -135,6 +112,7 @@ const getReducersByRelationshipForState = (reducers, redux_plugin_creator_state)
     .filter((reducer) => (reduxPluginCreatorRelationshipSelector(reducer)(redux_plugin_creator_state) === relationship));
 
 const getPluginReducers = (plugin_names) => plugin_names
+    .filter(plugin_name => plugin_name)// don't use undefined or null names
     .map(
         (plugin_name) => plugins[plugin_name].reducers
     )
@@ -149,6 +127,40 @@ const getSliceChange = ({ reducer_name, reducer, redux_plugin_creator_state, act
         initial_state: reducer(undefined, {}),// it would be ideal to be able to call it without parameters at all reducer()
         previous_slice_state,
         new_slice_state: reducer(previous_slice_state, action)
+    };
+};
+
+const reducersSelector = (reducers, redux_plugin_creator_state) => {
+    const getReducersByRelationship = getReducersByRelationshipForState(reducers, redux_plugin_creator_state);
+
+    const relationships = [
+        MANY_GROUPS_TO_MANY_PLUGINS,
+        MANY_GROUPS_TO_ONE_PLUGIN,
+        ONE_GROUP_TO_ONE_PLUGIN,
+        ONE_GROUP_TO_MANY_PLUGINS
+    ];
+    const reducers_by_relationship = fromPairs(relationships.map(relationship => [relationship, getReducersByRelationship(relationship)]));
+
+    return (action) => {
+        if(action.reference_id === REFERENCE_ID_DEFAULT) {
+            if(action.reference_group === REFERENCE_GROUP_COMMON) {
+                return [
+                    ...reducers_by_relationship[ONE_GROUP_TO_ONE_PLUGIN],
+                    ...reducers_by_relationship[ONE_GROUP_TO_MANY_PLUGINS]
+                ];
+            } else {
+                return [
+                    ...reducers_by_relationship[MANY_GROUPS_TO_ONE_PLUGIN],
+                    ...reducers_by_relationship[MANY_GROUPS_TO_MANY_PLUGINS]
+                ];
+            }
+        } else {
+            if(action.reference_group === REFERENCE_GROUP_COMMON) {
+                return reducers_by_relationship[ONE_GROUP_TO_MANY_PLUGINS];
+            } else {
+                return reducers_by_relationship[MANY_GROUPS_TO_MANY_PLUGINS];
+            }
+        }
     };
 };
 

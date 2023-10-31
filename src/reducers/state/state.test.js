@@ -354,6 +354,7 @@ test(TEST_NAME, (t) => {
                 }
             })
             .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            //.map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
 
         const new_state = reduxPluginCreatorStateReducer(state, action);
@@ -431,6 +432,7 @@ test(TEST_NAME, (t) => {
                 }
             })
             .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
 
         const new_state = reduxPluginCreatorStateReducer(state, action);
@@ -512,6 +514,7 @@ test(TEST_NAME, (t) => {
                 }
             })
             .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
 
         const new_state = reduxPluginCreatorStateReducer(state, action);
@@ -607,6 +610,7 @@ test(TEST_NAME, (t) => {
                 }
             })
             .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
 
         const new_state = reduxPluginCreatorStateReducer(state, action);
@@ -666,7 +670,7 @@ test(TEST_NAME, (t) => {
             }
         });
 
-        const action = metaReferenceGroupAction( OTHER_REFERENCE_GROUP_1,
+        const action = metaReferenceGroupAction(OTHER_REFERENCE_GROUP_1,
             metaReferenceIdAction( 'test_1',
                 testMultipleOpenOneAction()
             )
@@ -697,6 +701,7 @@ test(TEST_NAME, (t) => {
                 }
             })
             .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
 
         const new_state = reduxPluginCreatorStateReducer(state, action);
@@ -780,6 +785,7 @@ test(TEST_NAME, (t) => {
                 }
             })
             .map(configurePluginRelationship(PLUGIN_MULTIPLE_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
 
         const new_state = reduxPluginCreatorStateReducer(state, action);
