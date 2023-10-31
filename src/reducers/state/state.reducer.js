@@ -13,6 +13,7 @@ import {
     actions as action_register,
     names,
     plugins,
+    reducers,
     MANY_GROUPS_TO_MANY_PLUGINS,
     MANY_GROUPS_TO_ONE_PLUGIN,
     ONE_GROUP_TO_ONE_PLUGIN,
@@ -41,12 +42,12 @@ const INITIAL_STATE = Object.freeze({
 
 const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
     const applyPluginRelationshipLimits = applyPluginRelationshipLimitsForState(redux_plugin_creator_state);
-    const getPluginsByRelationship = getPluginsByRelationshipForState(redux_plugin_creator_state);
+    const getReducersByRelationship = getReducersByRelationshipForState(reducers, redux_plugin_creator_state);
 
     // setting the default reference_group and reference_id, if they were not previously setted (remember references can not overwritten)
     action = metaReferenceGroupAction(REFERENCE_GROUP_COMMON,
         metaReferenceIdAction(REFERENCE_ID_DEFAULT,
-            applyPluginRelationshipLimits(action)// what to do with not registered actions? for now will have ONE_GROUP_TO_ONE_PLUGIN as default relationship
+            applyPluginRelationshipLimits(action, action)// what to do with not registered actions? for now will have ONE_GROUP_TO_ONE_PLUGIN as default relationship
         )
     );
 
@@ -54,24 +55,20 @@ const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
     let many_groups_reducers = [];
 
     if(action.reference_id === REFERENCE_ID_DEFAULT) {
-        many_groups_reducers = getPluginReducers([
-            ...getPluginsByRelationship(MANY_GROUPS_TO_ONE_PLUGIN),
-            ...getPluginsByRelationship(MANY_GROUPS_TO_MANY_PLUGINS)
-        ]);
+        many_groups_reducers = [
+            ...getReducersByRelationship(MANY_GROUPS_TO_ONE_PLUGIN),
+            ...getReducersByRelationship(MANY_GROUPS_TO_MANY_PLUGINS)
+        ];
         if(action.reference_group === REFERENCE_GROUP_COMMON) {
-            one_group_reducers = getPluginReducers([
-                ...getPluginsByRelationship(ONE_GROUP_TO_ONE_PLUGIN),
-                ...getPluginsByRelationship(ONE_GROUP_TO_MANY_PLUGINS)
-            ]);
+            one_group_reducers = [
+                ...getReducersByRelationship(ONE_GROUP_TO_ONE_PLUGIN),
+                ...getReducersByRelationship(ONE_GROUP_TO_MANY_PLUGINS)
+            ];
         }
     } else {
-        many_groups_reducers = getPluginReducers(
-            getPluginsByRelationship(MANY_GROUPS_TO_MANY_PLUGINS)
-        );
+        many_groups_reducers = getReducersByRelationship(MANY_GROUPS_TO_MANY_PLUGINS);
         if(action.reference_group === REFERENCE_GROUP_COMMON) {
-            one_group_reducers = getPluginReducers(
-                getPluginsByRelationship(ONE_GROUP_TO_MANY_PLUGINS)
-            );
+            one_group_reducers = getReducersByRelationship(ONE_GROUP_TO_MANY_PLUGINS);
         }
     }
 
@@ -102,15 +99,16 @@ const state = (redux_plugin_creator_state = INITIAL_STATE, action) => {
             ).flat(1);
 
     const actions = actions_carbon_original.concat(actions_carbon_copy);
+    const reducersSelector = action => ((action.reference_group === REFERENCE_GROUP_COMMON) ? one_group_reducers : many_groups_reducers);
 
     return actions.reduce(
-        slicesState(one_group_reducers, many_groups_reducers),
+        slicesState(reducersSelector),
         redux_plugin_creator_state
     );
 }
 
-const slicesState = (one_group_reducers, many_groups_reducers) => (redux_plugin_creator_state, action) =>
-    ((action.reference_group === REFERENCE_GROUP_COMMON) ? one_group_reducers : many_groups_reducers)
+const slicesState = (reducersSelector) => (redux_plugin_creator_state, action) =>
+    reducersSelector(action)
     .map(
         (reducer) => getSliceChange({ reducer_name: names[reducer.name], reducer, redux_plugin_creator_state, action })
     )
@@ -127,14 +125,14 @@ const slicesState = (one_group_reducers, many_groups_reducers) => (redux_plugin_
 // helpers
 const actionPluginName = action => path([action.type, 'plugin_name'], action_register);
 
-const applyPluginRelationshipLimitsForState = (redux_plugin_creator_state) => (action = {}) => ({
+const applyPluginRelationshipLimitsForState = (redux_plugin_creator_state) => (reference, action = {}) => ({
     ...action,
-    ...RELATIONSHIP_LIMITS[reduxPluginCreatorRelationshipSelector(action)(redux_plugin_creator_state)]
+    ...RELATIONSHIP_LIMITS[reduxPluginCreatorRelationshipSelector(reference)(redux_plugin_creator_state)]
 });
 
-const getPluginsByRelationshipForState = (redux_plugin_creator_state) => (relationship) => keys(plugins)
-    .filter((plugin_name) => (plugin_name !== PLUGIN_NAME))// this is a workaround to avoid for now that the reduxPluginCreatorStateReducer will be called on infinity nested loop when calling the registered reducers
-    .filter((plugin_name) => (reduxPluginCreatorRelationshipSelector(plugin_name)(redux_plugin_creator_state) === relationship));
+const getReducersByRelationshipForState = (reducers, redux_plugin_creator_state) => (relationship) => values(reducers)
+    .filter((reducer) => (reducer.plugin_name !== PLUGIN_NAME))// this is a workaround to avoid for now that the reduxPluginCreatorStateReducer will be called on infinity nested loop when calling the registered reducers
+    .filter((reducer) => (reduxPluginCreatorRelationshipSelector(reducer)(redux_plugin_creator_state) === relationship));
 
 const getPluginReducers = (plugin_names) => plugin_names
     .map(

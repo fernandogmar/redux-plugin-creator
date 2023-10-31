@@ -9,7 +9,7 @@ const relationship = (redux_component) => (redux_plugin_creator_state) => {
 
     const plugin_name = (typeof redux_component === 'string')
         ? plugin_names[redux_component] || redux_component
-        : redux_component.plugin_name || plugin_names[redux_component.type];
+        : redux_component && (redux_component.plugin_name || plugin_names[redux_component.type]);
 
     return pathOr(default_plugin_relationship, ['configuration', 'plugin_relationships', plugin_name], redux_plugin_creator_state);
 }
