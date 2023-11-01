@@ -1,5 +1,5 @@
 import test from 'tape';
-import REDUX_PLUGIN_CREATOR_LOGGERS, { reduxPluginCreatorLoggerReducer, initial_state } from 'redux-plugin-creator/logger.reducer.js';
+import REDUX_PLUGIN_CREATOR_STATE, { reduxPluginCreatorStateReducer, initial_state } from 'redux-plugin-creator/state.reducer.js';
 import { reduxPluginCreatorMetaCarbonCopyAction as metaCarbonCopyAction } from 'redux-plugin-creator/meta-carbon-copy.action.js';
 import { reduxPluginCreatorMetaCarbonCopyRequiredAction as metaCarbonCopyRequiredAction } from 'redux-plugin-creator/meta-carbon-copy-required.action.js';
 import { reduxPluginCreatorMetaCommonCarbonCopyRequiredAction as metaCommonCarbonCopyRequiredAction } from 'redux-plugin-creator/meta-common-carbon-copy-required.action.js';
@@ -22,20 +22,20 @@ import reduxPluginCreatorStateConfigurator, {
     configurePluginRelationship
 } from 'redux-plugin-creator/state.configurator.js';
 
-const TEST_NAME = 'reduxPluginCreatorLoggerReducerModule';
+const TEST_NAME = 'reduxPluginCreatorStateReducerModule';
 
 test(TEST_NAME, (t) => {
 
     t.test(`${TEST_NAME}: the default export of this module`, (t) => {
-        const actual = REDUX_PLUGIN_CREATOR_LOGGERS;
+        const actual = REDUX_PLUGIN_CREATOR_STATE;
         t.equal(typeof actual, 'string', 'should be a string');
         t.notEqual(actual, '', 'should not be empty');
         t.end();
     });
 
     t.test(`${TEST_NAME}: the 'reduxPluginCreatorLoggers' reducer`, (t) => {
-        t.equal(typeof reduxPluginCreatorLoggerReducer, 'function', 'should be a function');
-        t.deepEqual(reduxPluginCreatorLoggerReducer(), initial_state, 'should return the initial value when called without arguments');
+        t.equal(typeof reduxPluginCreatorStateReducer, 'function', 'should be a function');
+        t.deepEqual(reduxPluginCreatorStateReducer(), initial_state, 'should return the initial value when called without arguments');
         t.end();
     });
 
@@ -55,7 +55,7 @@ test(TEST_NAME, (t) => {
         const state = reduxPluginCreatorStateConfigurator({ slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, ONE_GROUP_TO_ONE_PLUGIN))
             .get();
-        const new_state = actions.reduce(reduxPluginCreatorLoggerReducer, state);
+        const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
             ...state,
             slices: {
@@ -92,7 +92,7 @@ test(TEST_NAME, (t) => {
         const state = reduxPluginCreatorStateConfigurator({ slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, ONE_GROUP_TO_MANY_PLUGINS))
             .get();
-        const new_state = actions.reduce(reduxPluginCreatorLoggerReducer, state);
+        const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
             ...state,
             slices: {
@@ -131,7 +131,7 @@ test(TEST_NAME, (t) => {
         const state = reduxPluginCreatorStateConfigurator({ slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, MANY_GROUPS_TO_ONE_PLUGIN))
             .get();
-        const new_state = actions.reduce(reduxPluginCreatorLoggerReducer, state);
+        const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
             ...state,
             slices: {
@@ -174,7 +174,7 @@ test(TEST_NAME, (t) => {
         const state = reduxPluginCreatorStateConfigurator({ slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
             .get();
-        const new_state = actions.reduce(reduxPluginCreatorLoggerReducer, state);
+        const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
             ...state,
             slices: {
@@ -208,7 +208,7 @@ test(TEST_NAME, (t) => {
 
     function _state(values) {
         return {
-            ...reduxPluginCreatorLoggerReducer(),
+            ...reduxPluginCreatorStateReducer(),
             ...values
         }; // Extend initial state
     }
