@@ -18,7 +18,7 @@ import {
     ONE_GROUP_TO_ONE_PLUGIN,
     ONE_GROUP_TO_MANY_PLUGINS,
     REFERENCE_GROUP_COMMON,
-    REFERENCE_ID_DEFAULT
+    REFERENCE_ID_DEFAULT,
 } from 'redux-plugin-creator';
 import { getReducersByRelationshipForState } from './_helpers.js';
 import fromPairs from 'ramda/src/fromPairs';
@@ -72,7 +72,7 @@ const getPluginReducers = (plugin_names) => plugin_names
     .flat(1);
 
 const reducersSelector = (reducers, redux_plugin_creator_state) => {
-    const getReducersByRelationship = getReducersByRelationshipForState(reducers, redux_plugin_creator_state);
+    const getReducersByRelationship = getReducersByRelationshipForState(redux_plugin_creator_state);
 
     const relationships = [
         MANY_GROUPS_TO_MANY_PLUGINS,

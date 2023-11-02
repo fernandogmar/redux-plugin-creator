@@ -1,8 +1,5 @@
 import test from 'tape';
 import REDUX_PLUGIN_CREATOR_STATE, { reduxPluginCreatorStateReducer, initial_state } from 'redux-plugin-creator/state.reducer.js';
-import { reduxPluginCreatorMetaCarbonCopyAction as metaCarbonCopyAction } from 'redux-plugin-creator/meta-carbon-copy.action.js';
-import { reduxPluginCreatorMetaCarbonCopyRequiredAction as metaCarbonCopyRequiredAction } from 'redux-plugin-creator/meta-carbon-copy-required.action.js';
-import { reduxPluginCreatorMetaCommonCarbonCopyRequiredAction as metaCommonCarbonCopyRequiredAction } from 'redux-plugin-creator/meta-common-carbon-copy-required.action.js';
 import { reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
 import { reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
 import {
@@ -13,6 +10,8 @@ import {
     REFERENCE_GROUP_COMMON,
     REFERENCE_ID_DEFAULT,
     clearPlugins,
+    getPluginNames,
+    getLoggerNames,
     registerPluginAsLogger,
     plugins
 } from 'redux-plugin-creator';
@@ -52,13 +51,14 @@ test(TEST_NAME, (t) => {
             metaReferenceIdAction('any id', { type: 'action with only referenced id' }),
             { type: 'action with no references at all'}
         ];
-        const state = reduxPluginCreatorStateConfigurator({ slices: {} })
+        const state = reduxPluginCreatorStateConfigurator({ logger_slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, ONE_GROUP_TO_ONE_PLUGIN))
+            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
         const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
             ...state,
-            slices: {
+            logger_slices: {
                 [REFERENCE_GROUP_COMMON]: {
                     [REDUCER_NAME]: {
                         [REFERENCE_ID_DEFAULT]: [
@@ -89,13 +89,14 @@ test(TEST_NAME, (t) => {
             metaReferenceIdAction('any id', { type: 'action with only referenced id' }),
             { type: 'action with no references at all'}
         ];
-        const state = reduxPluginCreatorStateConfigurator({ slices: {} })
+        const state = reduxPluginCreatorStateConfigurator({ logger_slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, ONE_GROUP_TO_MANY_PLUGINS))
+            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
         const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
             ...state,
-            slices: {
+            logger_slices: {
                 [REFERENCE_GROUP_COMMON]: {
                     [REDUCER_NAME]: {
                         [REFERENCE_ID_DEFAULT]: [
@@ -128,13 +129,14 @@ test(TEST_NAME, (t) => {
             metaReferenceIdAction('any id', { type: 'action with only referenced id' }),
             { type: 'action with no references at all'}
         ];
-        const state = reduxPluginCreatorStateConfigurator({ slices: {} })
+        const state = reduxPluginCreatorStateConfigurator({ logger_slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, MANY_GROUPS_TO_ONE_PLUGIN))
+            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
         const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
             ...state,
-            slices: {
+            logger_slices: {
                 [REFERENCE_GROUP_COMMON]: {
                     [REDUCER_NAME]: {
                         [REFERENCE_ID_DEFAULT]: [
@@ -171,13 +173,14 @@ test(TEST_NAME, (t) => {
             metaReferenceIdAction('any id', { type: 'action with only referenced id' }),
             { type: 'action with no references at all'}
         ];
-        const state = reduxPluginCreatorStateConfigurator({ slices: {} })
+        const state = reduxPluginCreatorStateConfigurator({ logger_slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
+            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
         const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
             ...state,
-            slices: {
+            logger_slices: {
                 [REFERENCE_GROUP_COMMON]: {
                     [REDUCER_NAME]: {
                         [REFERENCE_ID_DEFAULT]: [

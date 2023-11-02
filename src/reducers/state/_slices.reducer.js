@@ -1,4 +1,5 @@
-import { reduxPluginCreatorSliceSelector, toPath } from 'redux-plugin-creator/slice.selector.js';
+import { reduxPluginCreatorIsLoggerSelector } from 'redux-plugin-creator/is-logger.selector.js';
+import { reduxPluginCreatorSliceSelector, toSlicePath } from 'redux-plugin-creator/slice.selector.js';
 // helpers
 import { names } from 'redux-plugin-creator';
 import { applyPluginRelationshipLimitsForState } from './_helpers.js';
@@ -22,11 +23,12 @@ const slicesReducer = (reducersSelector) => (redux_plugin_creator_state, action)
 
 // helpers
 const getSliceChange = ({ reducer_name, reducer, redux_plugin_creator_state, action }) => {
+    const is_logger = reduxPluginCreatorIsLoggerSelector(reducer_name)(redux_plugin_creator_state);
     const reference = applyPluginRelationshipLimitsForState(redux_plugin_creator_state)(reducer, action);
-    const previous_slice_state = reduxPluginCreatorSliceSelector(reducer_name, reference)(redux_plugin_creator_state);
+    const previous_slice_state = reduxPluginCreatorSliceSelector(reducer_name, reference, is_logger)(redux_plugin_creator_state);
 
     return {
-        slice_path: toPath(reducer_name, reference),
+        slice_path: toSlicePath(reducer_name, reference, is_logger),
         initial_state: reducer(undefined, {}),// it would be ideal to be able to call it without parameters at all reducer()
         previous_slice_state,
         new_slice_state: reducer(previous_slice_state, action)
