@@ -21,7 +21,7 @@ import reduxPluginCreatorStateConfigurator, {
     configurePluginRelationship
 } from 'redux-plugin-creator/state.configurator.js';
 
-const TEST_NAME = 'reduxPluginCreatorStateReducerModule';
+const TEST_NAME = 'reduxPluginCreatorStateLoggerSlicesReducerModule';
 
 test(TEST_NAME, (t) => {
 
@@ -39,7 +39,6 @@ test(TEST_NAME, (t) => {
     });
 
     t.test(`${TEST_NAME}: a logger with relationship ONE_GROUP_TO_ONE_PLUGIN`, (t) => {
-        clearPlugins();
         const { PLUGIN_NAME, registerReducerAsLogger } = registerPluginAsLogger('test');
         const { REDUCER_NAME, testStateReducer } = registerReducerAsLogger(function logger(test_state = [], action = {}) {
             return action.type ? test_state.concat(action.type) : test_state;
@@ -74,11 +73,10 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: a logger with relationship ONE_GROUP_TO_MANY_PLUGINS`, (t) => {
-        clearPlugins();
         const { PLUGIN_NAME, registerReducerAsLogger } = registerPluginAsLogger('test');
         const { REDUCER_NAME, testStateReducer } = registerReducerAsLogger(function logger(test_state = [], action = {}) {
             return action.type ? test_state.concat(action.type) : test_state;
@@ -114,11 +112,10 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: a logger with relationship MANY_GROUPS_TO_ONE_PLUGIN`, (t) => {
-        clearPlugins();
         const { PLUGIN_NAME, registerReducerAsLogger } = registerPluginAsLogger('test');
         const { REDUCER_NAME, testStateReducer } = registerReducerAsLogger(function logger(test_state = [], action = {}) {
             return action.type ? test_state.concat(action.type) : test_state;
@@ -158,11 +155,10 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: a logger with relationship MANY_GROUPS_TO_MANY_PLUGINS`, (t) => {
-        clearPlugins();
         const { PLUGIN_NAME, registerReducerAsLogger } = registerPluginAsLogger('test');
         const { REDUCER_NAME, testStateReducer } = registerReducerAsLogger(function logger(test_state = [], action = {}) {
             return action.type ? test_state.concat(action.type) : test_state;
@@ -206,14 +202,12 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
-    function _state(values) {
-        return {
-            ...reduxPluginCreatorStateReducer(),
-            ...values
-        }; // Extend initial state
+    function teardown(t) {
+        clearPlugins();
+        t.end();
     }
 
 });

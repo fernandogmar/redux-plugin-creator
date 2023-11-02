@@ -1,5 +1,3 @@
-import 'redux-plugin-creator/second.test.js';
-import 'redux-plugin-creator/first.action.js';
 import fromPairs from 'ramda/src/fromPairs';
 import keys from 'ramda/src/keys';
 import toPairs from 'ramda/src/toPairs';

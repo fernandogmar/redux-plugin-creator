@@ -25,9 +25,7 @@ import reduxPluginCreatorStateConfigurator, {
     configurePluginRelationship
 } from 'redux-plugin-creator/state.configurator.js';
 
-console.log(plugins);
-
-const TEST_NAME = 'reduxPluginCreatorStateReducerModule';
+const TEST_NAME = 'reduxPluginCreatorStateSlicesReducerModule';
 
 test(TEST_NAME, (t) => {
 
@@ -40,14 +38,13 @@ test(TEST_NAME, (t) => {
 
     t.test(`${TEST_NAME}: the 'reduxPluginCreatorState' reducer`, (t) => {
         t.equal(typeof reduxPluginCreatorStateReducer, 'function', 'should be a function');
-        t.deepEqual(reduxPluginCreatorStateReducer(), initial_state, 'should return the initial value when called without arguments');
+        t.deepEqual(reduxPluginCreatorStateReducer(), initial_state, 'should return the initial value when called without arguments HEREEEEEEE');
         t.end();
     });
 
     t.test(`${TEST_NAME}: for an action with referenced group and id`, (t) => {
         const first = () => {};
 
-        clearPlugins();
         const { PLUGIN_NAME, registerAction, registerReducer } = registerPlugin('test');
         const { ACTION_NAME: ACTION_FIRST_NAME, testFirstAction } = registerAction(first);
         const { REDUCER_NAME, testStateReducer } = registerReducer(function state(test_state, action = {}) {
@@ -67,11 +64,10 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: for a common action, when the references groups were not initiated yet`, (t) => {
-        clearPlugins();
         const { PLUGIN_NAME: PLUGIN_SINGLE_NAME, registerReducer: registerSingleReducer } = registerPlugin('test-single');
         const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action = {}) {
             return `single ${action.type}`;
@@ -101,14 +97,13 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: for a common action, when other reference groups were initiated`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
 
-        clearPlugins();
         const { PLUGIN_NAME: PLUGIN_SINGLE_NAME, registerReducer: registerSingleReducer } = registerPlugin('test-single');
         const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action = {}) {
             return `single ${action.type}`;
@@ -155,14 +150,13 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: for a no common action, when other references groups were initiated`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
 
-        clearPlugins();
         const { PLUGIN_NAME: PLUGIN_SINGLE_NAME, registerReducer: registerSingleReducer } = registerPlugin('test-single');
         const { REDUCER_NAME: REDUCER_SINGLE_NAME, testSingleStateReducer } = registerSingleReducer(function state(test_state, action = {}) {
             return `single ${action.type}`;
@@ -201,14 +195,13 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: for a no common action to a concrete id, when other references groups were initiated`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
 
-        clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
         const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state, action = {}) {
             switch(action.type) {
@@ -260,14 +253,13 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: for a no common action to a concrete id and common group/no group, when other references groups were initiated`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
 
-        clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
         const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = 0, action = {}) {
             switch(action.type) {
@@ -319,14 +311,13 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: for a no common action without concrete id, when other references groups were initiated`, (t) => {
         const OTHER_REFERENCE_GROUP_1 = 'OTHER_REFERENCE_GROUP_1';
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
 
-        clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
         const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = 0, action = {}) {
             switch(action.type) {
@@ -380,7 +371,7 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     // carbon copy cases //
@@ -389,7 +380,6 @@ test(TEST_NAME, (t) => {
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
         const close = () => {};
 
-        clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerAction: registerMultipleAction, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
         const { ACTION_NAME: ACTION_MULTIPLE_CLOSE_NAME, testMultipleCloseAction } = registerMultipleAction(close);
         const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = false, action = {}) {
@@ -465,7 +455,7 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: for an action that should be applied to all the references id of all groups`, (t) => {
@@ -473,7 +463,6 @@ test(TEST_NAME, (t) => {
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
         const close = () => {};
 
-        clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerAction: registerMultipleAction, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
         const { ACTION_NAME: ACTION_MULTIPLE_CLOSE_NAME, testMultipleCloseAction } = registerMultipleAction(close);
         const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = false, action = {}) {
@@ -547,7 +536,7 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: for an action that should be applied to all the references id of all groups, more than one reducer in the plugin`, (t) => {
@@ -555,7 +544,6 @@ test(TEST_NAME, (t) => {
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
         const close = () => {};
 
-        clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerAction: registerMultipleAction, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
         const { ACTION_NAME: ACTION_MULTIPLE_CLOSE_NAME, testMultipleCloseAction } = registerMultipleAction(close);
         const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = false, action = {}) {
@@ -652,7 +640,7 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: for an action that should be applied to all the references id of the plugin in the same group, when carbon copies recieved should do something different`, (t) => {
@@ -660,7 +648,6 @@ test(TEST_NAME, (t) => {
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
         const openOne = () => metaCarbonCopyRequiredAction({});
 
-        clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerAction: registerMultipleAction, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
         const { ACTION_NAME: ACTION_MULTIPLE_OPEN_ONE_NAME, testMultipleOpenOneAction } = registerMultipleAction(openOne);
         const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = false, action = {}) {
@@ -734,7 +721,7 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
     t.test(`${TEST_NAME}: for an action that should be applied to all the references id of all groups, when carbon copies recieved should do something different`, (t) => {
@@ -742,7 +729,6 @@ test(TEST_NAME, (t) => {
         const OTHER_REFERENCE_GROUP_2 = 'OTHER_REFERENCE_GROUP_2';
         const openOne = () => metaCarbonCopyRequiredAction({});
 
-        clearPlugins();
         const { PLUGIN_NAME: PLUGIN_MULTIPLE_NAME, registerAction: registerMultipleAction, registerReducer: registerMultipleReducer } = registerPlugin('test-multiple');
         const { ACTION_NAME: ACTION_MULTIPLE_OPEN_ONE_NAME, testMultipleOpenOneAction } = registerMultipleAction(openOne);
         const { REDUCER_NAME: REDUCER_MULTIPLE_NAME, testMultipleStateReducer } = registerMultipleReducer(function state(test_state = false, action = {}) {
@@ -818,14 +804,12 @@ test(TEST_NAME, (t) => {
 
         t.notEqual(new_state, state, 'should return a different state');
         t.deepEqual(new_state, expected_state, 'should update the selected slice');
-        t.end();
+        teardown(t);
     });
 
-    function _state(values) {
-        return {
-            ...reduxPluginCreatorStateReducer(),
-            ...values
-        }; // Extend initial state
+    function teardown(t) {
+        clearPlugins();
+        t.end();
     }
 
 });
