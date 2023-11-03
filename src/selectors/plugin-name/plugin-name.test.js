@@ -1,6 +1,6 @@
 import test from 'tape';
 import { reduxPluginCreatorPluginNameSelector } from 'redux-plugin-creator/plugin-name.selector.js';
-import Configurator, { configureDefaultPluginRelationship, configureNameMappers, configurePluginRelationship } from 'redux-plugin-creator/state.configurator.js';
+import Configurator, { configureDefaultPluginRelationship, configurePluginRelationship } from 'redux-plugin-creator/state.configurator.js';
 
 const TEST_NAME = 'reduxPluginCreatorPluginNameSelectorModule';
 
@@ -19,8 +19,7 @@ test(TEST_NAME, (t) => {
         );
         t.deepEqual(
             reduxPluginCreatorPluginNameSelector('my_action')(
-                Configurator()
-                    .map(configureNameMappers([], { my_action: 'my_plugin_name'}))
+                Configurator({}, () => ({ my_action: 'my_plugin_name'}))
                     .get())
             ,
             'my_plugin_name',
@@ -28,8 +27,7 @@ test(TEST_NAME, (t) => {
         )
         t.deepEqual(
             reduxPluginCreatorPluginNameSelector({ type: 'my_action' })(
-                Configurator()
-                .map(configureNameMappers([], { my_action: 'my_plugin_name'}))
+                Configurator({}, () => ({ my_action: 'my_plugin_name'}))
                 .get()
             ),
             'my_plugin_name',

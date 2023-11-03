@@ -4,8 +4,6 @@ import { REFERENCE_GROUP_COMMON, reduxPluginCreatorMetaReferenceGroupAction as m
 import { REFERENCE_ID_DEFAULT, reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
 import {
     clearPlugins,
-    getPluginNames,
-    getLoggerNames,
     registerPluginAsLogger,
     plugins
 } from 'redux-plugin-creator';
@@ -15,7 +13,6 @@ import reduxPluginCreatorStateConfigurator, {
     ONE_GROUP_TO_ONE_PLUGIN,
     ONE_GROUP_TO_MANY_PLUGINS,
     configureDefaultPluginRelationship,
-    configureNameMappers,
     configurePluginRelationship
 } from 'redux-plugin-creator/state.configurator.js';
 
@@ -50,7 +47,6 @@ test(TEST_NAME, (t) => {
         ];
         const state = reduxPluginCreatorStateConfigurator({ logger_slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, ONE_GROUP_TO_ONE_PLUGIN))
-            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
         const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
@@ -87,7 +83,6 @@ test(TEST_NAME, (t) => {
         ];
         const state = reduxPluginCreatorStateConfigurator({ logger_slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, ONE_GROUP_TO_MANY_PLUGINS))
-            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
         const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
@@ -126,7 +121,6 @@ test(TEST_NAME, (t) => {
         ];
         const state = reduxPluginCreatorStateConfigurator({ logger_slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, MANY_GROUPS_TO_ONE_PLUGIN))
-            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
         const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
@@ -169,7 +163,6 @@ test(TEST_NAME, (t) => {
         ];
         const state = reduxPluginCreatorStateConfigurator({ logger_slices: {} })
             .map(configurePluginRelationship(PLUGIN_NAME, MANY_GROUPS_TO_MANY_PLUGINS))
-            .map(configureNameMappers(getLoggerNames(), getPluginNames()))
             .get();
         const new_state = actions.reduce(reduxPluginCreatorStateReducer, state);
         const expected_state = {
