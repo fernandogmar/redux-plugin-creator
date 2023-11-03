@@ -1,14 +1,8 @@
 import test from 'tape';
 import REDUX_PLUGIN_CREATOR_STATE, { reduxPluginCreatorStateReducer, initial_state } from 'redux-plugin-creator/state.reducer.js';
-import { reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
-import { reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
+import { REFERENCE_GROUP_COMMON, reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
+import { REFERENCE_ID_DEFAULT, reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
 import {
-    MANY_GROUPS_TO_MANY_PLUGINS,
-    MANY_GROUPS_TO_ONE_PLUGIN,
-    ONE_GROUP_TO_ONE_PLUGIN,
-    ONE_GROUP_TO_MANY_PLUGINS,
-    REFERENCE_GROUP_COMMON,
-    REFERENCE_ID_DEFAULT,
     clearPlugins,
     getPluginNames,
     getLoggerNames,
@@ -16,6 +10,10 @@ import {
     plugins
 } from 'redux-plugin-creator';
 import reduxPluginCreatorStateConfigurator, {
+    MANY_GROUPS_TO_MANY_PLUGINS,
+    MANY_GROUPS_TO_ONE_PLUGIN,
+    ONE_GROUP_TO_ONE_PLUGIN,
+    ONE_GROUP_TO_MANY_PLUGINS,
     configureDefaultPluginRelationship,
     configureNameMappers,
     configurePluginRelationship

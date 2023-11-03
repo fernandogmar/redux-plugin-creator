@@ -29,44 +29,6 @@ const clearPlugins = () => {
     reactions = {};
     selectors = {};
 };
-////////////////////////////////////////////////////////////
-
-const REFERENCE_GROUP_COMMON = '__COMMON__';
-const REFERENCE_ID_DEFAULT = '__DEFAULT__';
-
-
-// to avid cyclick denpendy issue
-const metaReferenceGroup = (reference_group, action) => action?.reference_group
-    ? action
-    : {
-        ...action,
-        reference_group
-    };
-
-const metaReferenceId = (reference_id, action) => action?.reference_id
-    ? action
-    : {
-        ...action,
-        reference_id
-    };
-
-// should it be moved to relationship.selector.js??
-const MANY_GROUPS_TO_MANY_PLUGINS= "MANY_GROUPS_TO_MANY_PLUGINS";
-const MANY_GROUPS_TO_ONE_PLUGIN = "MANY_GROUPS_TO_ONE_PLUGIN";
-const ONE_GROUP_TO_MANY_PLUGINS = "ONE_GROUP_TO_MANY_PLUGINS";
-const ONE_GROUP_TO_ONE_PLUGIN = "ONE_GROUP_TO_ONE_PLUGIN";
-
-// should it be moved to state.reducer.js??
-const RELATIONSHIP_LIMITS = {
-    MANY_GROUPS_TO_MANY_PLUGINS: Object.freeze({}),
-    MANY_GROUPS_TO_ONE_PLUGIN: Object.freeze(metaReferenceId(REFERENCE_ID_DEFAULT)),
-    ONE_GROUP_TO_MANY_PLUGINS: Object.freeze(metaReferenceGroup(REFERENCE_GROUP_COMMON)),
-    ONE_GROUP_TO_ONE_PLUGIN: Object.freeze(metaReferenceGroup(REFERENCE_GROUP_COMMON, metaReferenceId(REFERENCE_ID_DEFAULT)))
-};
-
-
-
-/////////////////////////////////////////////////////////
 
 const addPluginName = (plugin_name, fn) => Object.defineProperty(fn, 'plugin_name', { value: plugin_name });
 const nameFunction = (name, fn) => Object.defineProperty(fn, 'name', { value: name });
@@ -217,19 +179,9 @@ const registerPluginAsLogger = (plugin_name) => {
 };
 
 export {
-    MANY_GROUPS_TO_MANY_PLUGINS,
-    MANY_GROUPS_TO_ONE_PLUGIN,
-    ONE_GROUP_TO_ONE_PLUGIN,
-    ONE_GROUP_TO_MANY_PLUGINS,
-    REFERENCE_GROUP_COMMON,
-    REFERENCE_ID_DEFAULT,
-    RELATIONSHIP_LIMITS,
-
     clearPlugins,
     getPluginNames,
     getLoggerNames,
-    metaReferenceGroup,
-    metaReferenceId,
     registerPlugin,
     registerPluginAsLogger,
 

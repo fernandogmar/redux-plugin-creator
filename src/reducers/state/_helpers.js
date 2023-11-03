@@ -1,8 +1,6 @@
 import { reduxPluginCreatorRelationshipSelector } from 'redux-plugin-creator/relationship.selector.js';
-import {
-    reducers,
-    RELATIONSHIP_LIMITS
-} from 'redux-plugin-creator';
+import { reducers } from 'redux-plugin-creator';
+import { RELATIONSHIP_LIMITS } from 'redux-plugin-creator/state.configurator.js';
 import PLUGIN_NAME from 'redux-plugin-creator/register.js';
 import values from 'ramda/src/values';
 

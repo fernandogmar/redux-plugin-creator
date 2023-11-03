@@ -1,6 +1,12 @@
 import { registerMetaAction } from 'redux-plugin-creator/register.js';
-import { metaReferenceGroup, REFERENCE_GROUP_COMMON } from 'redux-plugin-creator';
+const REFERENCE_GROUP_COMMON = '__COMMON__';
 
+const metaReferenceGroup = (reference_group = REFERENCE_GROUP_COMMON, action) => action?.reference_group
+    ? action
+    : {
+        ...action,
+        reference_group
+    };
 const { ACTION_NAME, reduxPluginCreatorMetaReferenceGroupAction } = registerMetaAction(metaReferenceGroup);
 
 export {

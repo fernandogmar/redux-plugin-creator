@@ -1,7 +1,12 @@
 import { registerMetaAction } from 'redux-plugin-creator/register.js';
-import { metaReferenceId, REFERENCE_ID_DEFAULT } from 'redux-plugin-creator';
+const REFERENCE_ID_DEFAULT = '__DEFAULT__';
 
-
+const metaReferenceId = (reference_id = REFERENCE_ID_DEFAULT, action) => action?.reference_id
+    ? action
+    : {
+        ...action,
+        reference_id
+    };
 const { ACTION_NAME, reduxPluginCreatorMetaReferenceIdAction } = registerMetaAction(metaReferenceId);
 
 export {

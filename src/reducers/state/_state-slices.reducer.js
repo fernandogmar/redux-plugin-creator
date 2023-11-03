@@ -1,7 +1,7 @@
 // actions
 import { reduxPluginCreatorMetaCarbonCopyAction as metaCarbonCopyAction } from 'redux-plugin-creator/meta-carbon-copy.action.js';
-import { reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
-import { reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
+import { REFERENCE_GROUP_COMMON, reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
+import { REFERENCE_ID_DEFAULT, reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
 // reducers
 import { slicesReducer } from './_slices.reducer.js';
 // selectors
@@ -12,14 +12,14 @@ import { reduxPluginCreatorReferenceIdsSelector } from 'redux-plugin-creator/ref
 import {
     names,
     plugins,
-    reducers,
+    reducers
+} from 'redux-plugin-creator';
+import {
     MANY_GROUPS_TO_MANY_PLUGINS,
     MANY_GROUPS_TO_ONE_PLUGIN,
     ONE_GROUP_TO_ONE_PLUGIN,
-    ONE_GROUP_TO_MANY_PLUGINS,
-    REFERENCE_GROUP_COMMON,
-    REFERENCE_ID_DEFAULT,
-} from 'redux-plugin-creator';
+    ONE_GROUP_TO_MANY_PLUGINS
+} from 'redux-plugin-creator/state.configurator.js';
 import { getReducersByRelationshipForState } from './_helpers.js';
 import fromPairs from 'ramda/src/fromPairs';
 import prop from 'ramda/src/prop';

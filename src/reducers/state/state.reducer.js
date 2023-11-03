@@ -1,12 +1,10 @@
-import { reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
-import { reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
+import { REFERENCE_GROUP_COMMON, reduxPluginCreatorMetaReferenceGroupAction as metaReferenceGroupAction } from 'redux-plugin-creator/meta-reference-group.action.js';
+import { REFERENCE_ID_DEFAULT, reduxPluginCreatorMetaReferenceIdAction as metaReferenceIdAction } from 'redux-plugin-creator/meta-reference-id.action.js';
 import { _stateLoggerSlicesReducer } from './_state-logger-slices.reducer.js';
 import { _stateSlicesReducer } from './_state-slices.reducer.js';
 import {
-    ONE_GROUP_TO_ONE_PLUGIN,
-    REFERENCE_GROUP_COMMON,
-    REFERENCE_ID_DEFAULT
-} from 'redux-plugin-creator';
+    ONE_GROUP_TO_ONE_PLUGIN
+} from 'redux-plugin-creator/state.configurator.js';
 import { registerReducer } from 'redux-plugin-creator/register.js';
 import { applyPluginRelationshipLimitsForState } from './_helpers.js';
 
